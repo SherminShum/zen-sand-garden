@@ -595,14 +595,12 @@
     const safeSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch{return false}};
     const safeRemove=k=>{try{localStorage.removeItem(k);return true}catch{return false}};
 
-    function detectLang(){
-      const s=safeGet('zen-sand-lang');
-      if(s&&I18N[s])return s;
-      const n=(navigator.language||'').toLowerCase();
-      if(n.startsWith('zh'))return /cn|sg|hans/.test(n)?'zh-CN':'zh';
-      const b=n.split('-')[0];
-      return I18N[b]?b:'en';
+   function detectLang(){
+  const s=safeGet('zen-sand-lang');
+  if(s&&I18N[s])return s;
+  return 'en';
     }
+    
     let lang=detectLang();
     function t(k,...a){
       const v=(I18N[lang]&&I18N[lang][k]!==undefined)?I18N[lang][k]:I18N.en[k];
