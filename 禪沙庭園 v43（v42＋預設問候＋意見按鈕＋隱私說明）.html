@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>禪沙庭園</title>
+  <style>
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden}
+    body{font-family:Georgia,"Noto Serif TC","Noto Serif JP","Noto Serif KR",serif;color:#45290e;background:#c9a563}
+    button,input,select{font:inherit}
+    button{cursor:pointer}
+    .hidden{display:none!important}
+    #intro,#game{position:fixed;inset:0}
+    #intro{display:flex;flex-direction:column;background:radial-gradient(circle at 50% 16%,#f2dba1 0,transparent 55%),repeating-radial-gradient(circle at 30% 40%,#ffffff12 0 1px,transparent 1px 8px),linear-gradient(155deg,#e0bd79,#b98946)}
+    .intro-head{height:56px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 16px}
+    #greeting{font-size:clamp(14px,2vw,19px);font-weight:bold}
+    .gear{border:0;background:transparent;color:#4e2b0c;font-size:27px;width:44px;height:44px;line-height:1;flex:none}
+    .intro-main{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;align-items:center;justify-content:safe center;padding:12px 16px 25px}
+    h1{font-size:clamp(32px,7vw,76px);letter-spacing:.14em;text-align:center;line-height:1.2;margin:0}
+    .subtitle{text-align:center;font-size:clamp(14px,2vw,19px);margin:7px 0 20px}
+    .intro-grid{width:min(100%,920px);display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .card{min-height:105px;padding:12px;border:1px solid #9a713d77;border-radius:15px;background:#fff2c65c;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+    .card .emoji{font-size:27px}
+    .card strong{font-size:17px}
+    .card small{font-size:13px;line-height:1.5}
+    .card.wide{grid-column:span 3;background:#d7efcf70}
+    .start{margin-top:19px;padding:12px 38px;border-radius:30px;border:1px solid #ebcd86;color:#ffe8b0;background:#684014;font-size:17px}
+    #music-tip{margin:12px 0 0;font-size:13px;color:#5d3a12;text-align:center}
+    #game{display:none;flex-direction:column;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+    .bar{flex:none;display:flex;align-items:center;gap:6px;padding:6px 9px;background:linear-gradient(90deg,#d8b879,#c39b5b);border-bottom:1px solid #986e3a}
+    .bar-title{white-space:nowrap;font-weight:bold;font-size:15px}
+    .tools{flex:1;min-width:0;display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+    .tool{border:1px solid #a37840;border-radius:8px;background:#fff2c657;color:#4b2a0c;padding:7px 9px;white-space:nowrap;font-size:13px}
+    .tool.active{background:#f6e5ba;border-color:#603b12;box-shadow:inset 0 0 0 1px #b8894a}
+    #sand-wrap{position:relative;flex:1;min-height:0;overflow:hidden}
+    canvas{width:100%;height:100%;display:block;touch-action:none;cursor:crosshair;-webkit-touch-callout:none}
+    #hint{position:absolute;left:50%;top:10px;transform:translateX(-50%);pointer-events:none;color:#fffaf0;background:#79603cb8;border-radius:20px;padding:6px 13px;font-size:13px;text-align:center;opacity:0;transition:opacity .2s;max-width:90%}
+    #hint.show{opacity:1}
+    #settings{position:fixed;right:10px;top:58px;z-index:1000;width:min(300px,calc(100vw - 20px));max-height:calc(100dvh - 76px);overflow-y:auto;background:linear-gradient(155deg,#e9ce93,#c8a163);border:1px solid #94662d;border-radius:16px;box-shadow:0 12px 35px #35200b66;padding:14px}
+    #settings h2{font-size:17px;margin:1px 0 13px}
+    .setting-label{font-size:13px;margin:12px 0 5px;font-weight:bold}
+    .sound-row{display:flex;gap:9px;align-items:center}
+    .sound-row input{flex:1;min-width:0;accent-color:#6c471e}
+    .sound-row button,.menu-btn,.modal-btn{border:1px solid #9d7137;border-radius:8px;background:#fff0c477;color:#45290e;padding:7px 10px}
+    .lang-select{width:100%;padding:8px;border:1px solid #9d7137;border-radius:8px;background:#fff0c4aa;color:#45290e;font-size:16px}
+    .menu-btn{width:100%;text-align:left;margin-top:6px;font-size:14px}
+    a.menu-btn{display:block;text-decoration:none}
+    .settings-divider{border:0;border-top:1px solid #98704070;margin:13px 0}
+    .modal{position:fixed;inset:0;z-index:2000;background:#211303a8;display:flex;justify-content:center;align-items:center;padding:16px}
+    .modal-box{width:min(420px,100%);max-height:calc(100dvh - 32px);overflow-y:auto;border-radius:17px;border:1px solid #a8793b;background:linear-gradient(150deg,#efdaa2,#d1aa6e);box-shadow:0 15px 45px #1b120966;padding:22px}
+    .modal-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .modal-top h2{font-size:22px;margin:0}
+    .close{border:0;background:transparent;font-size:23px;color:#45290e}
+    .modal-box p{line-height:1.8;margin:12px 0;font-size:15px}
+    .modal-box label{display:block;margin:12px 0 7px}
+    .modal-box input[type=text]{width:100%;border-radius:8px;border:1px solid #a27b4a;padding:10px;background:#fff7e2;font-size:16px;-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+    .modal-btn{display:inline-block;margin-top:12px;text-decoration:none}
+    .support-link{display:block;width:100%;margin-top:16px;padding:12px 14px;text-align:center;font-size:16px;font-weight:bold;background:#684014;color:#ffe8b0;border-color:#4a2b0c}
+    .feedback-actions{display:flex;gap:14px;margin-top:16px;justify-content:center}
+    .feedback-actions .modal-btn{width:68px;height:68px;margin-top:0;padding:0;border-radius:50%;text-align:center;font-size:32px;line-height:1;display:flex;align-items:center;justify-content:center}
+    .feedback-actions .modal-btn.selected{background:#f6e5ba;border-color:#603b12;box-shadow:inset 0 0 0 2px #b8894a}
+    #feedback-msg{min-height:27px;color:#3f6a2b;text-align:center}
+    .note{font-size:12px!important;color:#654622}
+    #profile-msg{font-size:13px;min-height:19px;margin-top:8px;color:#3f6a2b}
+    #profile-msg.error{color:#9b2f20}
+    @media(max-width:600px){
+      .intro-grid{grid-template-columns:repeat(2,1fr)}
+      .card.wide{grid-column:span 2}
+      .card{min-height:94px;padding:9px}
+      .card strong{font-size:15px}
+      .card small{font-size:12px}
+      .card .emoji{font-size:22px}
+    }
+    @media(max-width:650px){
+      .bar{align-items:flex-start}
+      .bar-title{display:none}
+      .tools{justify-content:center}
+      .tool{font-size:12px;padding:7px 6px}
+    }
+  </style>
+</head>
+<body>
+  <section id="intro">
+    <header class="intro-head">
+      <span id="greeting" aria-live="polite"></span>
+      <button class="gear" type="button" data-settings data-i18n-aria="openSet" aria-expanded="false">⚙️</button>
+    </header>
+    <main class="intro-main">
+      <h1 data-i18n="title"></h1>
+      <p class="subtitle" data-i18n="sub"></p>
+      <div class="intro-grid">
+        <div class="card"><span class="emoji">🖊</span><strong data-i18n="rakeT"></strong><small data-i18n="rakeD"></small></div>
+        <div class="card"><span class="emoji">👆</span><strong data-i18n="fingT"></strong><small data-i18n="fingD"></small></div>
+        <div class="card"><span class="emoji">〇</span><strong data-i18n="ripT"></strong><small data-i18n="ripD"></small></div>
+        <div class="card"><span class="emoji">⬤</span><strong data-i18n="stoT"></strong><small data-i18n="stoD"></small></div>
+        <div class="card"><span class="emoji">✨</span><strong data-i18n="allT"></strong><small data-i18n="allD"></small></div>
+        <div class="card wide"><span class="emoji">🤚</span><strong data-i18n="smT"></strong><small data-i18n="smD"></small></div>
+      </div>
+      <button class="start" id="start" type="button" data-i18n="start"></button>
+      <p id="music-tip" class="hidden" data-i18n="tip"></p>
+    </main>
+  </section>
+
+  <section id="game" data-i18n-aria="aGame">
+    <header class="bar">
+      <span class="bar-title" data-i18n="title"></span>
+      <div class="tools" role="toolbar" data-i18n-aria="aTools">
+        <button class="tool active" data-tool="rake" type="button" data-i18n="tRake"></button>
+        <button class="tool" data-tool="finger" type="button" data-i18n="tFing"></button>
+        <button class="tool" data-tool="ripple" type="button" data-i18n="tRip"></button>
+        <button class="tool" data-tool="stone" type="button" data-i18n="tSto"></button>
+        <button class="tool" data-tool="smooth" type="button" data-i18n="tSm"></button>
+        <button class="tool" id="smooth-all" type="button" data-i18n="tAll"></button>
+        <button class="tool" id="reset" type="button" data-i18n="tReset"></button>
+      </div>
+      <button class="gear" type="button" id="home-button">🏠</button>
+      <button class="gear" type="button" data-settings data-i18n-aria="openSet" aria-expanded="false">⚙️</button>
+    </header>
+    <div id="sand-wrap">
+      <canvas id="sand" data-i18n-aria="aSand"></canvas>
+      <div id="hint" role="status"></div>
+    </div>
+  </section>
+
+  <aside id="settings" class="hidden">
+    <h2 data-i18n="setT"></h2>
+    <div class="setting-label">🌐 語言 / Language</div>
+    <select id="lang-select" class="lang-select" aria-label="Language">
+      <option value="zh">繁體中文</option>
+      <option value="zh-CN">简体中文</option>
+      <option value="en">English</option>
+      <option value="ja">日本語</option>
+      <option value="ko">한국어</option>
+      <option value="fr">Français</option>
+      <option value="es">Español</option>
+      <option value="de">Deutsch</option>
+      <option value="id">Bahasa Indonesia</option>
+      <option value="ms">Bahasa Melayu</option>
+    </select>
+    <div class="setting-label" data-i18n="lMusic"></div>
+    <div class="sound-row">
+      <input id="music-volume" type="range" min="0" max="100" value="18" data-i18n-aria="vMusic">
+      <button id="music-toggle" type="button"></button>
+    </div>
+    <div class="setting-label" data-i18n="lFx"></div>
+    <div class="sound-row">
+      <input id="fx-volume" type="range" min="0" max="100" value="55" data-i18n-aria="vFx">
+      <button id="fx-toggle" type="button"></button>
+    </div>
+    <hr class="settings-divider">
+    <button class="menu-btn" id="profile-button" type="button" data-i18n="bProf"></button>
+    <button class="menu-btn" id="about-button" type="button" data-i18n="bAbout"></button>
+    <button class="menu-btn" id="feedback-button" type="button" data-i18n="bFb"></button>
+    <a class="menu-btn hidden" id="suggest-link" href="#" target="_blank" rel="noopener noreferrer" data-i18n="bSug"></a>
+    <button class="menu-btn" id="support-button" type="button" data-i18n="bSup"></button>
+  </aside>
+
+  <div class="modal hidden" id="about-modal" role="dialog" aria-modal="true" aria-labelledby="about-title">
+    <div class="modal-box">
+      <div class="modal-top"><h2 id="about-title" data-i18n="aT"></h2><button class="close" data-close data-i18n-aria="close">×</button></div>
+      <p data-i18n="a1"></p>
+      <p data-i18n="a2"></p>
+      <p data-i18n="a3"></p>
+      <p data-i18n="a4"></p>
+      <p class="note" data-i18n="aN"></p>
+      <p class="note" data-i18n="aP"></p>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="profile-modal" role="dialog" aria-modal="true" aria-labelledby="profile-title">
+    <div class="modal-box">
+      <div class="modal-top"><h2 id="profile-title" data-i18n="pT"></h2><button class="close" data-close data-i18n-aria="close">×</button></div>
+      <label for="nickname" data-i18n="pL"></label>
+      <input id="nickname" type="text" maxlength="20" autocomplete="nickname" data-i18n-ph="pPh">
+      <div id="profile-msg" role="status"></div>
+      <button class="modal-btn" id="save-profile" type="button" data-i18n="pSave"></button>
+      <button class="modal-btn" id="clear-profile" type="button" style="margin-left:8px" data-i18n="pClr"></button>
+      <p class="note" data-i18n="pN"></p>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="feedback-modal" role="dialog" aria-modal="true" aria-labelledby="feedback-title">
+    <div class="modal-box">
+      <div class="modal-top">
+        <h2 id="feedback-title" data-i18n="fT"></h2>
+        <button class="close" data-close data-i18n-aria="close">×</button>
+      </div>
+      <p data-i18n="f1"></p>
+      <p data-i18n="f2"></p>
+      <div class="feedback-actions">
+        <button class="modal-btn" id="like-button" type="button" data-i18n-aria="like" data-i18n-title="like">👍</button>
+        <button class="modal-btn" id="dislike-button" type="button" data-i18n-aria="dis" data-i18n-title="dis">👎</button>
+      </div>
+      <p id="feedback-msg" class="note" role="status"></p>
+      <p class="note" data-i18n="fN"></p>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="support-modal" role="dialog" aria-modal="true" aria-labelledby="support-title">
+    <div class="modal-box">
+      <div class="modal-top"><h2 id="support-title" data-i18n="sT"></h2><button class="close" data-close data-i18n-aria="close">×</button></div>
+      <p><span data-i18n="s1"></span><br><span data-i18n="s2"></span><br><span data-i18n="s3"></span></p>
+      <a class="modal-btn support-link" id="support-link" href="https://www.paypal.com/ncp/payment/5RJFRRTNHFCDY" target="_blank" rel="noopener noreferrer" data-i18n="sBtn"></a>
+      <p class="note" data-i18n="sN"></p>
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+
+    // ===== 請在這裡填入您的 Google 表單網址（留空則不顯示「給我們建議」按鈕）=====
+    const SUGGEST_URL='';
+
+    const I18N={
+      zh:{
+        title:"禪沙庭園",sub:"靜下心來，感受沙的溫度",
+        rakeT:"耙紋",rakeD:"劃開細沙，兩側輕輕隆起",
+        fingT:"手指撥沙",fingD:"推開沙粒，在指尖前堆成小丘",
+        ripT:"漣漪",ripD:"按住讓漣漪慢慢擴散，放開聲音漸漸散去",
+        stoT:"石頭",stoD:"輕點沙面，放下一顆石頭",
+        allT:"全部撫平",allD:"讓整片沙面慢慢平靜",
+        smT:"手掌撫平",smD:"來回輕撫，沙紋會慢慢變柔、變淺；碰到石頭會輕輕推動它",
+        start:"✦ 開始放鬆 ✦",tip:"🎧 點一下畫面任一處，開啟輕柔音樂",
+        tRake:"🖊 耙紋",tFing:"👆 撥沙",tRip:"〇 漣漪",tSto:"⬤ 石頭",tSm:"🤚 撫平",tAll:"✨ 全部撫平",tReset:"↺ 重置",
+        setT:"⚙️ 設定",lMusic:"🎵 背景音樂",lFx:"🔊 互動音效",on:"開啟",mute:"靜音",vMusic:"音樂音量",vFx:"音效音量",
+        bProf:"👤 個人資料",bAbout:"ℹ️ 關於禪沙庭園",bFb:"👍 喜歡這座庭園嗎？",bSup:"☕ 自由支持",bSug:"💬 給我們建議",
+        aT:"關於禪沙庭園",
+        a1:"我也曾被壓力與煩惱包圍，在很長一段時間裡，心裡裝滿了痛苦與不安。",
+        a2:"後來我慢慢走了出來，也體會到：當心先安靜下來，才有力氣好好思考，也才看得見美好的一面。",
+        a3:"所以我做了這座「禪沙庭園」。希望在您疲憊的時候，可以先把痛苦、壓力和煩惱放在一旁，輕輕撥一撥沙，讓心靜一靜。",
+        a4:"不用完成任何目標，也不用登入。慢慢來，照自己的步調就好。🤍",
+        aN:"這座庭園是放鬆的小角落，不能取代專業協助。若您覺得撐不住，請找信任的人或專業人員聊聊。",
+        aP:"本站使用不含個人資料的匿名統計，只用來了解造訪人數。您的名字與讚／倒讚仍只儲存在您的瀏覽器。意見表單完全自願，不填也沒關係。",
+        pT:"👤 個人資料",pL:"名字／暱稱（選填）",pPh:"例如：小沙",pSave:"儲存",pClr:"清除名字",
+        pN:"名字只會顯示在首頁問候，並儲存在目前瀏覽器。不需密碼、不建立線上帳號，也不會跨裝置同步。請勿輸入敏感個資。",
+        pErr1:"請輸入 1 至 20 個字的名字。",pErr2:"無法儲存，請確認瀏覽器允許本機儲存。",pOk:"已儲存 ✓",pErr3:"無法清除本機資料。",pClrd:"已清除名字",
+        hello:n=>n+"，您好",
+        fT:"喜歡這座庭園嗎？",f1:"謝謝您來到這座小小的庭園。",
+        f2:"如果這裡讓您感到一點放鬆、安靜，或陪您度過片刻疲憊，歡迎留下簡單的回饋。",
+        like:"讚",dis:"倒讚",
+        fN:"這個回饋只會儲存在您目前的瀏覽器中，不需要登入、不會付款，也不會傳送個人資料。",
+        fP:"點一下 👍 或 👎，留下簡單的感受。",fLike:"謝謝您的喜歡。願這座庭園陪您慢慢放鬆。🤍",fDis:"謝謝您的回饋。我會繼續讓這座庭園變得更好。",
+        sT:"☕ 自由支持",s1:"這座庭園免費開放，沒有廣告。",
+        s2:"若您願意，可以自由支持；只是來坐坐，也很好。",
+        s3:"無論如何，謝謝您來到這裡。願您好好休息。🤍",
+        sBtn:"前往支持頁 ↗",
+        sN:"支持完全出於自願，不影響任何遊玩內容。本遊戲不會收集或儲存您的付款資料。",
+        hRake:"拖動，用耙子劃出細紋",hFing:"拖動，用手指撥開沙粒",hRip:"按住讓漣漪慢慢擴散，放開聲音漸漸散去",hSto:"輕點，放下一顆石頭",hSm:"輕輕來回撫過，沙紋會慢慢變柔",
+        hAll:"✨ 沙面慢慢平靜下來",hReset:"沙盤已重置",hStart:"選擇上方工具，在沙面拖動或點擊",
+        close:"關閉",openSet:"開啟設定",aSand:"互動沙盤",aGame:"禪沙庭園遊戲",aTools:"沙盤工具"
+      },
+      "zh-CN":{
+        title:"禅沙庭园",sub:"静下心来，感受沙的温度",
+        rakeT:"耙纹",rakeD:"划开细沙，两侧轻轻隆起",
+        fingT:"手指拨沙",fingD:"推开沙粒，在指尖前堆成小丘",
+        ripT:"涟漪",ripD:"按住让涟漪慢慢扩散，松开后声音渐渐散去",
+        stoT:"石头",stoD:"轻点沙面，放下一颗石头",
+        allT:"全部抚平",allD:"让整片沙面慢慢平静",
+        smT:"手掌抚平",smD:"来回轻抚，沙纹会慢慢变柔、变浅；碰到石头会轻轻推动它",
+        start:"✦ 开始放松 ✦",tip:"🎧 点一下画面任意处，开启轻柔音乐",
+        tRake:"🖊 耙纹",tFing:"👆 拨沙",tRip:"〇 涟漪",tSto:"⬤ 石头",tSm:"🤚 抚平",tAll:"✨ 全部抚平",tReset:"↺ 重置",
+        setT:"⚙️ 设置",lMusic:"🎵 背景音乐",lFx:"🔊 互动音效",on:"开启",mute:"静音",vMusic:"音乐音量",vFx:"音效音量",
+        bProf:"👤 个人资料",bAbout:"ℹ️ 关于禅沙庭园",bFb:"👍 喜欢这座庭园吗？",bSup:"☕ 自由支持",bSug:"💬 给我们建议",
+        aT:"关于禅沙庭园",
+        a1:"我也曾被压力与烦恼包围，在很长一段时间里，心里装满了痛苦与不安。",
+        a2:"后来我慢慢走了出来，也体会到：当心先安静下来，才有力气好好思考，也才看得见美好的一面。",
+        a3:"所以我做了这座“禅沙庭园”。希望在您疲惫的时候，可以先把痛苦、压力和烦恼放在一旁，轻轻拨一拨沙，让心静一静。",
+        a4:"不用完成任何目标，也不用登录。慢慢来，按自己的步调就好。🤍",
+        aN:"这座庭园是放松的小角落，不能取代专业帮助。如果您觉得撑不住，请找信任的人或专业人员聊聊。",
+        aP:"本站使用不含个人信息的匿名统计，只用来了解访问人数。您的名字与赞／踩仍只保存在您的浏览器。意见表单完全自愿，不填也没关系。",
+        pT:"👤 个人资料",pL:"名字／昵称（选填）",pPh:"例如：小沙",pSave:"保存",pClr:"清除名字",
+        pN:"名字只会显示在首页问候，并保存在当前浏览器。不需要密码、不建立在线账号，也不会跨设备同步。请勿输入敏感个人信息。",
+        pErr1:"请输入 1 至 20 个字的名字。",pErr2:"无法保存，请确认浏览器允许本地存储。",pOk:"已保存 ✓",pErr3:"无法清除本地数据。",pClrd:"已清除名字",
+        hello:n=>n+"，您好",
+        fT:"喜欢这座庭园吗？",f1:"谢谢您来到这座小小的庭园。",
+        f2:"如果这里让您感到一点放松、安静，或陪您度过片刻疲惫，欢迎留下简单的反馈。",
+        like:"赞",dis:"踩",
+        fN:"这个反馈只会保存在您当前的浏览器中，不需要登录、不会付款，也不会发送个人信息。",
+        fP:"点一下 👍 或 👎，留下简单的感受。",fLike:"谢谢您的喜欢。愿这座庭园陪您慢慢放松。🤍",fDis:"谢谢您的反馈。我会继续让这座庭园变得更好。",
+        sT:"☕ 自由支持",s1:"这座庭园免费开放，没有广告。",
+        s2:"如果您愿意，可以自由支持；只是来坐坐，也很好。",
+        s3:"无论如何，谢谢您来到这里。愿您好好休息。🤍",
+        sBtn:"前往支持页 ↗",
+        sN:"支持完全出于自愿，不影响任何游玩内容。本游戏不会收集或保存您的付款信息。",
+        hRake:"拖动，用耙子划出细纹",hFing:"拖动，用手指拨开沙粒",hRip:"按住让涟漪慢慢扩散，松开后声音渐渐散去",hSto:"轻点，放下一颗石头",hSm:"轻轻来回抚过，沙纹会慢慢变柔",
+        hAll:"✨ 沙面慢慢平静下来",hReset:"沙盘已重置",hStart:"选择上方工具，在沙面拖动或点击",
+        close:"关闭",openSet:"打开设置",aSand:"互动沙盘",aGame:"禅沙庭园游戏",aTools:"沙盘工具"
+      },
+      en:{
+        title:"Zen Sand Garden",sub:"Slow down and feel the warmth of the sand",
+        rakeT:"Rake",rakeD:"Draw fine lines in the sand, with soft ridges on both sides",
+        fingT:"Finger Push",fingD:"Push the grains aside and gather a small mound ahead of your fingertip",
+        ripT:"Ripples",ripD:"Press and hold to let ripples spread slowly; release and the sound fades away",
+        stoT:"Stone",stoD:"Tap the sand to place a stone",
+        allT:"Smooth All",allD:"Let the whole garden grow calm",
+        smT:"Palm Smooth",smD:"Stroke back and forth; the patterns soften and fade. Stones are gently nudged",
+        start:"✦ Begin to Relax ✦",tip:"🎧 Tap anywhere to start the gentle music",
+        tRake:"🖊 Rake",tFing:"👆 Push",tRip:"〇 Ripple",tSto:"⬤ Stone",tSm:"🤚 Smooth",tAll:"✨ Smooth All",tReset:"↺ Reset",
+        setT:"⚙️ Settings",lMusic:"🎵 Background music",lFx:"🔊 Sound effects",on:"On",mute:"Muted",vMusic:"Music volume",vFx:"Effects volume",
+        bProf:"👤 Profile",bAbout:"ℹ️ About Zen Sand Garden",bFb:"👍 Enjoying the garden?",bSup:"☕ Free Support",bSug:"💬 Send suggestions",
+        aT:"About Zen Sand Garden",
+        a1:"I was once surrounded by stress and worries, and for a long time my heart was full of pain and unease.",
+        a2:"Slowly I found my way out, and I learned this: when the mind quiets first, you have the strength to think clearly, and you can see the good again.",
+        a3:"So I made this “Zen Sand Garden”. When you are tired, I hope you can set your pain, stress and worries aside for a while, gently stir the sand, and let your heart settle.",
+        a4:"There is no goal to complete and no login. Take your time, at your own pace. 🤍",
+        aN:"This garden is a small corner for relaxing and cannot replace professional help. If you feel you cannot hold on, please talk to someone you trust or a professional.",
+        aP:"This site uses anonymous statistics that contain no personal data, only to understand how many people visit. Your name and like/dislike stay only in your browser. The feedback form is entirely voluntary; feel free to skip it.",
+        pT:"👤 Profile",pL:"Name / nickname (optional)",pPh:"e.g. Sandy",pSave:"Save",pClr:"Clear name",
+        pN:"Your name is only shown in the greeting on the home screen and is stored in this browser. No password, no online account, and no syncing across devices. Please do not enter sensitive personal information.",
+        pErr1:"Please enter a name of 1 to 20 characters.",pErr2:"Could not save. Please make sure your browser allows local storage.",pOk:"Saved ✓",pErr3:"Could not clear local data.",pClrd:"Name cleared",
+        hello:n=>"Hello, "+n,
+        fT:"Enjoying the garden?",f1:"Thank you for visiting this little garden.",
+        f2:"If it brought you a little calm, quiet, or kept you company through a tired moment, feel free to leave simple feedback.",
+        like:"Like",dis:"Dislike",
+        fN:"This feedback is stored only in your current browser. No login, no payment, and no personal data is sent.",
+        fP:"Tap 👍 or 👎 to share a simple feeling.",fLike:"Thank you for liking it. May this garden help you relax slowly. 🤍",fDis:"Thank you for your feedback. I will keep making this garden better.",
+        sT:"☕ Free Support",s1:"This garden is free and has no ads.",
+        s2:"If you wish, you may support it freely; simply sitting here for a while is just as welcome.",
+        s3:"Either way, thank you for coming. May you rest well. 🤍",
+        sBtn:"Go to support page ↗",
+        sN:"Support is entirely voluntary and does not affect any part of the game. This game does not collect or store your payment information.",
+        hRake:"Drag to draw fine lines with the rake",hFing:"Drag to push the sand aside with your finger",hRip:"Press and hold to let ripples spread; release and the sound fades",hSto:"Tap to place a stone",hSm:"Stroke gently back and forth; the patterns will soften",
+        hAll:"✨ The sand slowly settles",hReset:"Garden reset",hStart:"Choose a tool above, then drag or tap on the sand",
+        close:"Close",openSet:"Open settings",aSand:"Interactive sand garden",aGame:"Zen Sand Garden game",aTools:"Sand tools"
+      },
+      ja:{
+        title:"禅の砂庭",sub:"心を静めて、砂のぬくもりを感じましょう",
+        rakeT:"熊手",rakeD:"砂に細い筋を引くと、両側がやさしく盛り上がります",
+        fingT:"指で砂を動かす",fingD:"砂粒を押しのけて、指先の前に小さな山をつくります",
+        ripT:"さざ波",ripD:"押し続けると波紋がゆっくり広がり、離すと音がゆっくり消えます",
+        stoT:"石",stoD:"砂面をタップして石を置きます",
+        allT:"すべてならす",allD:"砂全体をゆっくり静めます",
+        smT:"手のひらでならす",smD:"行ったり来たりなでると、砂の模様がやわらかく浅くなります。石はそっと動きます",
+        start:"✦ ゆっくり始める ✦",tip:"🎧 画面のどこかをタップすると、やさしい音楽が流れます",
+        tRake:"🖊 熊手",tFing:"👆 指",tRip:"〇 さざ波",tSto:"⬤ 石",tSm:"🤚 ならす",tAll:"✨ すべてならす",tReset:"↺ リセット",
+        setT:"⚙️ 設定",lMusic:"🎵 BGM",lFx:"🔊 効果音",on:"オン",mute:"ミュート",vMusic:"BGMの音量",vFx:"効果音の音量",
+        bProf:"👤 プロフィール",bAbout:"ℹ️ 禅の砂庭について",bFb:"👍 この庭は気に入りましたか?",bSup:"☕ 自由な応援",bSug:"💬 ご意見・ご提案",
+        aT:"禅の砂庭について",
+        a1:"私もかつて、ストレスや悩みに囲まれ、長いあいだ心が苦しさと不安でいっぱいでした。",
+        a2:"それから少しずつ立ち直り、気づいたことがあります。心がまず静かになれば、落ち着いて考える力が湧き、良いところも見えてくるということです。",
+        a3:"そこで、この「禅の砂庭」をつくりました。疲れたときは、苦しみやストレス、悩みをいったん脇に置いて、砂をそっと動かし、心を静めてください。",
+        a4:"達成すべき目標も、ログインも必要ありません。ご自分のペースでゆっくりどうぞ。🤍",
+        aN:"この庭は、ほっと息をつくための小さな場所で、専門的な支援の代わりにはなりません。つらくて耐えられないときは、信頼できる人や専門家に相談してください。",
+        aP:"このサイトでは、個人情報を含まない匿名の統計を、訪問者数の把握のためだけに使用しています。お名前や「いいね／よくない」はお使いのブラウザにのみ保存されます。ご意見フォームは完全に任意で、入力しなくても大丈夫です。",
+        pT:"👤 プロフィール",pL:"名前・ニックネーム(任意)",pPh:"例:すなちゃん",pSave:"保存",pClr:"名前を消す",
+        pN:"名前はホーム画面のあいさつにのみ表示され、このブラウザに保存されます。パスワードもオンラインアカウントも不要で、端末間の同期もしません。個人情報などの機微な情報は入力しないでください。",
+        pErr1:"1〜20文字の名前を入力してください。",pErr2:"保存できませんでした。ブラウザがローカルストレージを許可しているか確認してください。",pOk:"保存しました ✓",pErr3:"ローカルデータを消去できませんでした。",pClrd:"名前を消去しました",
+        hello:n=>n+"さん、こんにちは",
+        fT:"この庭は気に入りましたか?",f1:"この小さな庭に来てくださり、ありがとうございます。",
+        f2:"少しでも落ち着けた、静かな気持ちになれた、疲れた時間に寄り添えた、と感じたら、簡単な感想を残してください。",
+        like:"いいね",dis:"よくない",
+        fN:"この感想は現在のブラウザにのみ保存されます。ログインも支払いも不要で、個人情報は送信されません。",
+        fP:"👍 か 👎 をタップして、気持ちを残してください。",fLike:"ありがとうございます。この庭が、ゆっくり休む助けになりますように。🤍",fDis:"ご意見ありがとうございます。これからも庭をよくしていきます。",
+        sT:"☕ 自由な応援",s1:"この庭は無料で、広告もありません。",
+        s2:"よろしければ、自由に応援いただけます。ただ座りに来てくださるだけでも歓迎です。",
+        s3:"どちらでも、来てくださってありがとうございます。ゆっくり休んでくださいね。🤍",
+        sBtn:"応援ページへ ↗",
+        sN:"応援は完全に任意で、ゲームの内容には影響しません。このゲームは決済情報を取得・保存しません。",
+        hRake:"ドラッグして、熊手で細い筋を引きます",hFing:"ドラッグして、指で砂を押しのけます",hRip:"押し続けると波紋が広がり、離すと音が消えていきます",hSto:"タップして石を置きます",hSm:"やさしく行き来すると、模様がやわらかくなります",
+        hAll:"✨ 砂がゆっくり静まります",hReset:"砂庭をリセットしました",hStart:"上のツールを選んで、砂をドラッグまたはタップしてください",
+        close:"閉じる",openSet:"設定を開く",aSand:"インタラクティブな砂庭",aGame:"禅の砂庭ゲーム",aTools:"砂のツール"
+      },
+      ko:{
+        title:"선(禪) 모래 정원",sub:"마음을 가라앉히고 모래의 온기를 느껴 보세요",
+        rakeT:"갈퀴",rakeD:"고운 모래에 가는 줄을 그으면 양옆이 살며시 솟아오릅니다",
+        fingT:"손가락으로 모래 밀기",fingD:"모래알을 밀어내 손가락 앞에 작은 언덕을 만듭니다",
+        ripT:"물결",ripD:"누르고 있으면 물결이 천천히 퍼지고, 놓으면 소리가 서서히 사라집니다",
+        stoT:"돌",stoD:"모래 위를 눌러 돌을 놓습니다",
+        allT:"모두 고르기",allD:"모래 전체를 천천히 잔잔하게 만듭니다",
+        smT:"손바닥으로 고르기",smD:"오가며 살살 쓰다듬으면 모래 무늬가 부드럽고 얕아집니다. 돌은 살짝 밀립니다",
+        start:"✦ 편안히 시작하기 ✦",tip:"🎧 화면 아무 곳이나 누르면 잔잔한 음악이 시작됩니다",
+        tRake:"🖊 갈퀴",tFing:"👆 밀기",tRip:"〇 물결",tSto:"⬤ 돌",tSm:"🤚 고르기",tAll:"✨ 모두 고르기",tReset:"↺ 초기화",
+        setT:"⚙️ 설정",lMusic:"🎵 배경 음악",lFx:"🔊 효과음",on:"켜짐",mute:"음소거",vMusic:"음악 볼륨",vFx:"효과음 볼륨",
+        bProf:"👤 프로필",bAbout:"ℹ️ 선 모래 정원 소개",bFb:"👍 이 정원이 마음에 드시나요?",bSup:"☕ 자유로운 후원",bSug:"💬 의견 보내기",
+        aT:"선 모래 정원 소개",
+        a1:"저도 한때 스트레스와 걱정에 둘러싸여, 오랫동안 마음이 괴로움과 불안으로 가득했습니다.",
+        a2:"그러다 조금씩 빠져나오면서 깨달았습니다. 마음이 먼저 고요해져야 차분히 생각할 힘이 생기고, 좋은 면도 보인다는 것을요.",
+        a3:"그래서 이 「선 모래 정원」을 만들었습니다. 지쳤을 때 괴로움과 스트레스, 걱정을 잠시 내려놓고, 모래를 살살 쓸어 보며 마음을 가라앉혀 보세요.",
+        a4:"이루어야 할 목표도, 로그인도 없습니다. 자기 속도대로 천천히 하세요. 🤍",
+        aN:"이 정원은 쉬어 가는 작은 공간일 뿐, 전문적인 도움을 대신할 수 없습니다. 너무 힘들 때는 믿을 수 있는 사람이나 전문가와 이야기해 보세요.",
+        aP:"이 사이트는 방문자 수를 파악하기 위해서만 개인정보가 없는 익명 통계를 사용합니다. 이름과 좋아요/싫어요는 사용 중인 브라우저에만 저장됩니다. 의견 양식은 전적으로 자율이며, 작성하지 않으셔도 괜찮습니다.",
+        pT:"👤 프로필",pL:"이름／닉네임(선택)",pPh:"예: 모래",pSave:"저장",pClr:"이름 지우기",
+        pN:"이름은 홈 화면 인사말에만 표시되며 이 브라우저에 저장됩니다. 비밀번호도, 온라인 계정도 필요 없고 기기 간 동기화도 하지 않습니다. 민감한 개인정보는 입력하지 마세요.",
+        pErr1:"1~20자의 이름을 입력해 주세요.",pErr2:"저장하지 못했습니다. 브라우저가 로컬 저장소를 허용하는지 확인해 주세요.",pOk:"저장되었습니다 ✓",pErr3:"로컬 데이터를 지우지 못했습니다.",pClrd:"이름을 지웠습니다",
+        hello:n=>n+"님, 안녕하세요",
+        fT:"이 정원이 마음에 드시나요?",f1:"이 작은 정원을 찾아 주셔서 감사합니다.",
+        f2:"조금이라도 편안하고 고요했거나, 지친 순간을 함께했다면 간단한 의견을 남겨 주세요.",
+        like:"좋아요",dis:"싫어요",
+        fN:"이 의견은 현재 브라우저에만 저장됩니다. 로그인도 결제도 필요 없고 개인정보도 전송되지 않습니다.",
+        fP:"👍 또는 👎 를 눌러 느낌을 남겨 주세요.",fLike:"좋아해 주셔서 감사합니다. 이 정원이 천천히 쉬는 데 도움이 되기를 바랍니다. 🤍",fDis:"의견 감사합니다. 이 정원을 계속 더 좋게 만들겠습니다.",
+        sT:"☕ 자유로운 후원",s1:"이 정원은 무료이며 광고가 없습니다.",
+        s2:"원하신다면 자유롭게 후원해 주실 수 있습니다. 잠시 앉아 쉬러 오신 것만으로도 환영합니다.",
+        s3:"어느 쪽이든 와 주셔서 감사합니다. 푹 쉬세요. 🤍",
+        sBtn:"후원 페이지로 이동 ↗",
+        sN:"후원은 전적으로 자발적이며 게임 내용에 영향을 주지 않습니다. 이 게임은 결제 정보를 수집하거나 저장하지 않습니다.",
+        hRake:"드래그해서 갈퀴로 가는 줄을 그어 보세요",hFing:"드래그해서 손가락으로 모래를 밀어 보세요",hRip:"누르고 있으면 물결이 퍼지고, 놓으면 소리가 사라집니다",hSto:"눌러서 돌을 놓아 보세요",hSm:"살살 오가면 무늬가 부드러워집니다",
+        hAll:"✨ 모래가 천천히 잔잔해집니다",hReset:"정원을 초기화했습니다",hStart:"위에서 도구를 고르고 모래를 드래그하거나 눌러 보세요",
+        close:"닫기",openSet:"설정 열기",aSand:"인터랙티브 모래 정원",aGame:"선 모래 정원 게임",aTools:"모래 도구"
+      },
+      fr:{
+        title:"Jardin de sable zen",sub:"Apaisez-vous et sentez la chaleur du sable",
+        rakeT:"Râteau",rakeD:"Tracez de fines lignes dans le sable, avec de doux sillons de chaque côté",
+        fingT:"Pousser du doigt",fingD:"Écartez les grains et formez un petit monticule devant votre doigt",
+        ripT:"Ondulations",ripD:"Maintenez appuyé pour que les ondes se propagent lentement ; relâchez et le son s'éteint",
+        stoT:"Pierre",stoD:"Touchez le sable pour poser une pierre",
+        allT:"Tout lisser",allD:"Laissez tout le sable retrouver le calme",
+        smT:"Lisser à la main",smD:"Caressez d'un côté à l'autre ; les motifs s'adoucissent et s'estompent. Les pierres sont doucement poussées",
+        start:"✦ Commencer à se détendre ✦",tip:"🎧 Touchez l'écran n'importe où pour lancer la musique douce",
+        tRake:"🖊 Râteau",tFing:"👆 Pousser",tRip:"〇 Ondes",tSto:"⬤ Pierre",tSm:"🤚 Lisser",tAll:"✨ Tout lisser",tReset:"↺ Réinitialiser",
+        setT:"⚙️ Paramètres",lMusic:"🎵 Musique de fond",lFx:"🔊 Effets sonores",on:"Activé",mute:"Muet",vMusic:"Volume de la musique",vFx:"Volume des effets",
+        bProf:"👤 Profil",bAbout:"ℹ️ À propos du jardin de sable zen",bFb:"👍 Ce jardin vous plaît ?",bSup:"☕ Soutien libre",bSug:"💬 Envoyer des suggestions",
+        aT:"À propos du jardin de sable zen",
+        a1:"J'ai moi aussi été entouré de stress et de soucis, et pendant longtemps mon cœur a été rempli de douleur et d'inquiétude.",
+        a2:"Peu à peu, j'ai retrouvé mon chemin, et j'ai compris ceci : quand l'esprit s'apaise d'abord, on a la force de réfléchir clairement et de revoir le beau côté des choses.",
+        a3:"J'ai donc créé ce « Jardin de sable zen ». Quand vous êtes fatigué, j'espère que vous pourrez mettre de côté la douleur, le stress et les soucis, remuer doucement le sable et laisser votre cœur se calmer.",
+        a4:"Aucun objectif à atteindre, aucune connexion. Prenez votre temps, à votre rythme. 🤍",
+        aN:"Ce jardin est un petit coin de détente et ne remplace pas une aide professionnelle. Si vous sentez que vous n'en pouvez plus, parlez-en à une personne de confiance ou à un professionnel.",
+        aP:"Ce site utilise des statistiques anonymes, sans données personnelles, uniquement pour connaître le nombre de visiteurs. Votre nom et votre j'aime/je n'aime pas restent uniquement dans votre navigateur. Le formulaire de suggestions est entièrement facultatif.",
+        pT:"👤 Profil",pL:"Nom / pseudo (facultatif)",pPh:"ex. : Sablon",pSave:"Enregistrer",pClr:"Effacer le nom",
+        pN:"Votre nom n'apparaît que dans le message d'accueil de l'écran d'accueil et reste enregistré dans ce navigateur. Pas de mot de passe, pas de compte en ligne, pas de synchronisation entre appareils. Merci de ne saisir aucune donnée personnelle sensible.",
+        pErr1:"Veuillez saisir un nom de 1 à 20 caractères.",pErr2:"Enregistrement impossible. Vérifiez que votre navigateur autorise le stockage local.",pOk:"Enregistré ✓",pErr3:"Impossible d'effacer les données locales.",pClrd:"Nom effacé",
+        hello:n=>"Bonjour, "+n,
+        fT:"Ce jardin vous plaît ?",f1:"Merci d'être venu dans ce petit jardin.",
+        f2:"S'il vous a apporté un peu de calme ou vous a tenu compagnie dans un moment de fatigue, n'hésitez pas à laisser un avis simple.",
+        like:"J'aime",dis:"Je n'aime pas",
+        fN:"Cet avis est enregistré uniquement dans votre navigateur actuel. Pas de connexion, pas de paiement, aucune donnée personnelle envoyée.",
+        fP:"Touchez 👍 ou 👎 pour partager votre ressenti.",fLike:"Merci d'avoir aimé. Que ce jardin vous aide à vous détendre doucement. 🤍",fDis:"Merci pour votre avis. Je continuerai d'améliorer ce jardin.",
+        sT:"☕ Soutien libre",s1:"Ce jardin est gratuit et sans publicité.",
+        s2:"Si vous le souhaitez, vous pouvez le soutenir librement ; venir simplement vous asseoir un moment est tout aussi bienvenu.",
+        s3:"Dans tous les cas, merci d'être venu. Reposez-vous bien. 🤍",
+        sBtn:"Aller à la page de soutien ↗",
+        sN:"Le soutien est entièrement volontaire et n'affecte aucune partie du jeu. Ce jeu ne collecte ni ne conserve vos informations de paiement.",
+        hRake:"Faites glisser pour tracer de fines lignes avec le râteau",hFing:"Faites glisser pour écarter le sable du doigt",hRip:"Maintenez appuyé pour étendre les ondes ; relâchez et le son s'éteint",hSto:"Touchez pour poser une pierre",hSm:"Caressez doucement d'un côté à l'autre ; les motifs s'adoucissent",
+        hAll:"✨ Le sable se calme doucement",hReset:"Jardin réinitialisé",hStart:"Choisissez un outil ci-dessus, puis glissez ou touchez le sable",
+        close:"Fermer",openSet:"Ouvrir les paramètres",aSand:"Jardin de sable interactif",aGame:"Jeu Jardin de sable zen",aTools:"Outils pour le sable"
+      },
+      es:{
+        title:"Jardín de Arena Zen",sub:"Calma la mente y siente la calidez de la arena",
+        rakeT:"Rastrillo",rakeD:"Dibuja líneas finas en la arena, con suaves surcos a ambos lados",
+        fingT:"Empujar con el dedo",fingD:"Aparta los granos y forma un pequeño montículo frente a tu dedo",
+        ripT:"Ondas",ripD:"Mantén pulsado para que las ondas se expandan despacio; suelta y el sonido se desvanece",
+        stoT:"Piedra",stoD:"Toca la arena para colocar una piedra",
+        allT:"Alisar todo",allD:"Deja que toda la arena se calme",
+        smT:"Alisar con la palma",smD:"Pasa la mano de un lado a otro; los dibujos se suavizan y se vuelven más tenues. Las piedras se mueven con delicadeza",
+        start:"✦ Empezar a relajarse ✦",tip:"🎧 Toca en cualquier lugar para activar la música suave",
+        tRake:"🖊 Rastrillo",tFing:"👆 Empujar",tRip:"〇 Ondas",tSto:"⬤ Piedra",tSm:"🤚 Alisar",tAll:"✨ Alisar todo",tReset:"↺ Reiniciar",
+        setT:"⚙️ Ajustes",lMusic:"🎵 Música de fondo",lFx:"🔊 Efectos de sonido",on:"Activado",mute:"Silenciado",vMusic:"Volumen de la música",vFx:"Volumen de los efectos",
+        bProf:"👤 Perfil",bAbout:"ℹ️ Acerca del Jardín de Arena Zen",bFb:"👍 ¿Te gusta este jardín?",bSup:"☕ Apoyo voluntario",bSug:"💬 Enviar sugerencias",
+        aT:"Acerca del Jardín de Arena Zen",
+        a1:"Yo también viví rodeado de estrés y preocupaciones, y durante mucho tiempo mi corazón estuvo lleno de dolor e inquietud.",
+        a2:"Poco a poco salí adelante y comprendí algo: cuando la mente se calma primero, hay fuerzas para pensar con claridad y se puede ver otra vez lo bello.",
+        a3:"Por eso creé este «Jardín de Arena Zen». Cuando el cansancio te pese, ojalá puedas dejar a un lado el dolor, el estrés y las preocupaciones, mover suavemente la arena y dejar que tu corazón se serene.",
+        a4:"No hay metas que cumplir ni inicio de sesión. Ve despacio, a tu propio ritmo. 🤍",
+        aN:"Este jardín es un pequeño rincón para relajarse y no sustituye la ayuda profesional. Si sientes que ya no puedes más, habla con alguien de confianza o con un profesional.",
+        aP:"Este sitio usa estadísticas anónimas, sin datos personales, solo para saber cuántas personas lo visitan. Tu nombre y tu me gusta/no me gusta se guardan únicamente en tu navegador. El formulario de sugerencias es totalmente voluntario.",
+        pT:"👤 Perfil",pL:"Nombre / apodo (opcional)",pPh:"p. ej., Arenita",pSave:"Guardar",pClr:"Borrar nombre",
+        pN:"Tu nombre solo se muestra en el saludo de la pantalla de inicio y se guarda en este navegador. Sin contraseña, sin cuenta en línea y sin sincronización entre dispositivos. No introduzcas datos personales sensibles.",
+        pErr1:"Introduce un nombre de 1 a 20 caracteres.",pErr2:"No se pudo guardar. Comprueba que tu navegador permita el almacenamiento local.",pOk:"Guardado ✓",pErr3:"No se pudieron borrar los datos locales.",pClrd:"Nombre borrado",
+        hello:n=>"Hola, "+n,
+        fT:"¿Te gusta este jardín?",f1:"Gracias por visitar este pequeño jardín.",
+        f2:"Si te ha dado un poco de calma o te ha acompañado en un momento de cansancio, puedes dejar una valoración sencilla.",
+        like:"Me gusta",dis:"No me gusta",
+        fN:"Esta valoración solo se guarda en tu navegador actual. Sin inicio de sesión, sin pagos y sin enviar datos personales.",
+        fP:"Toca 👍 o 👎 para compartir lo que sientes.",fLike:"Gracias por tu cariño. Que este jardín te ayude a relajarte poco a poco. 🤍",fDis:"Gracias por tu opinión. Seguiré mejorando este jardín.",
+        sT:"☕ Apoyo voluntario",s1:"Este jardín es gratuito y no tiene anuncios.",
+        s2:"Si quieres, puedes apoyarlo libremente; venir a sentarte un rato también es muy bienvenido.",
+        s3:"Sea como sea, gracias por estar aquí. Que descanses bien. 🤍",
+        sBtn:"Ir a la página de apoyo ↗",
+        sN:"El apoyo es totalmente voluntario y no afecta a ninguna parte del juego. Este juego no recoge ni guarda tus datos de pago.",
+        hRake:"Arrastra para dibujar líneas finas con el rastrillo",hFing:"Arrastra para apartar la arena con el dedo",hRip:"Mantén pulsado para que las ondas se expandan; suelta y el sonido se desvanece",hSto:"Toca para colocar una piedra",hSm:"Pasa la mano suavemente de un lado a otro; los dibujos se suavizan",
+        hAll:"✨ La arena se va calmando poco a poco",hReset:"Jardín reiniciado",hStart:"Elige una herramienta arriba y arrastra o toca la arena",
+        close:"Cerrar",openSet:"Abrir ajustes",aSand:"Jardín de arena interactivo",aGame:"Juego Jardín de Arena Zen",aTools:"Herramientas de arena"
+      },
+      de:{
+        title:"Zen-Sandgarten",sub:"Komm zur Ruhe und spüre die Wärme des Sandes",
+        rakeT:"Harke",rakeD:"Ziehe feine Linien durch den Sand, mit sanften Rillen an beiden Seiten",
+        fingT:"Fingerschieben",fingD:"Schiebe die Körner beiseite und häufe vor deiner Fingerspitze ein kleines Hügelchen auf",
+        ripT:"Wellen",ripD:"Gedrückt halten, damit sich die Wellen langsam ausbreiten; loslassen, und der Klang verklingt",
+        stoT:"Stein",stoD:"Tippe auf den Sand, um einen Stein zu setzen",
+        allT:"Alles glätten",allD:"Lass die ganze Sandfläche zur Ruhe kommen",
+        smT:"Handflächen-Glätten",smD:"Streiche hin und her; die Muster werden weicher und flacher. Steine werden sanft verschoben",
+        start:"✦ Entspannen beginnen ✦",tip:"🎧 Tippe irgendwo, um die sanfte Musik zu starten",
+        tRake:"🖊 Harke",tFing:"👆 Schieben",tRip:"〇 Wellen",tSto:"⬤ Stein",tSm:"🤚 Glätten",tAll:"✨ Alles glätten",tReset:"↺ Zurücksetzen",
+        setT:"⚙️ Einstellungen",lMusic:"🎵 Hintergrundmusik",lFx:"🔊 Klangeffekte",on:"An",mute:"Stumm",vMusic:"Musiklautstärke",vFx:"Effektlautstärke",
+        bProf:"👤 Profil",bAbout:"ℹ️ Über den Zen-Sandgarten",bFb:"👍 Gefällt dir der Garten?",bSup:"☕ Freiwillige Unterstützung",bSug:"💬 Vorschläge senden",
+        aT:"Über den Zen-Sandgarten",
+        a1:"Auch ich war einmal von Stress und Sorgen umgeben, und lange Zeit war mein Herz voller Schmerz und Unruhe.",
+        a2:"Langsam fand ich wieder heraus, und ich habe gelernt: Wenn das Herz zuerst zur Ruhe kommt, hat man die Kraft, klar zu denken, und kann auch das Schöne wieder sehen.",
+        a3:"Deshalb habe ich diesen „Zen-Sandgarten“ gebaut. Wenn du müde bist, kannst du Schmerz, Stress und Sorgen für einen Moment beiseitelegen, den Sand sanft bewegen und dein Herz beruhigen.",
+        a4:"Es gibt kein Ziel zu erreichen und keine Anmeldung. Lass dir Zeit, ganz in deinem eigenen Tempo. 🤍",
+        aN:"Dieser Garten ist eine kleine Auszeit zum Entspannen und ersetzt keine professionelle Hilfe. Wenn du das Gefühl hast, nicht mehr weiterzukönnen, sprich bitte mit einer vertrauten Person oder mit Fachleuten.",
+        aP:"Diese Seite nutzt anonyme Statistiken ohne personenbezogene Daten, nur um die Besucherzahl zu erfahren. Dein Name und dein Gefällt mir/Gefällt mir nicht bleiben nur in deinem Browser. Das Rückmeldeformular ist völlig freiwillig.",
+        pT:"👤 Profil",pL:"Name / Spitzname (optional)",pPh:"z. B. Sandy",pSave:"Speichern",pClr:"Namen löschen",
+        pN:"Dein Name erscheint nur in der Begrüßung auf dem Startbildschirm und wird in diesem Browser gespeichert. Kein Passwort, kein Online-Konto und keine Synchronisierung zwischen Geräten. Bitte gib keine sensiblen persönlichen Daten ein.",
+        pErr1:"Bitte gib einen Namen mit 1 bis 20 Zeichen ein.",pErr2:"Speichern nicht möglich. Bitte prüfe, ob dein Browser lokalen Speicher erlaubt.",pOk:"Gespeichert ✓",pErr3:"Lokale Daten konnten nicht gelöscht werden.",pClrd:"Name gelöscht",
+        hello:n=>"Hallo, "+n,
+        fT:"Gefällt dir der Garten?",f1:"Danke, dass du in diesem kleinen Garten vorbeigeschaut hast.",
+        f2:"Wenn er dir ein wenig Ruhe geschenkt oder dich durch einen müden Moment begleitet hat, freue ich mich über eine kurze Rückmeldung.",
+        like:"Gefällt mir",dis:"Gefällt mir nicht",
+        fN:"Diese Rückmeldung wird nur in deinem aktuellen Browser gespeichert. Keine Anmeldung, keine Zahlung, und es werden keine persönlichen Daten gesendet.",
+        fP:"Tippe auf 👍 oder 👎, um ein kurzes Gefühl zu teilen.",fLike:"Danke, dass er dir gefällt. Möge dieser Garten dir helfen, in Ruhe zu entspannen. 🤍",fDis:"Danke für deine Rückmeldung. Ich werde den Garten weiter verbessern.",
+        sT:"☕ Freiwillige Unterstützung",s1:"Dieser Garten ist kostenlos und werbefrei.",
+        s2:"Wenn du magst, kannst du ihn freiwillig unterstützen; einfach nur eine Weile hier zu sitzen ist genauso willkommen.",
+        s3:"Auf jeden Fall: Danke, dass du hier bist. Ruh dich gut aus. 🤍",
+        sBtn:"Zur Unterstützungsseite ↗",
+        sN:"Die Unterstützung ist völlig freiwillig und hat keinen Einfluss auf das Spiel. Dieses Spiel erfasst oder speichert keine Zahlungsdaten.",
+        hRake:"Ziehen, um mit der Harke feine Linien zu zeichnen",hFing:"Ziehen, um den Sand mit dem Finger beiseitezuschieben",hRip:"Gedrückt halten, damit sich Wellen ausbreiten; loslassen, und der Klang verklingt",hSto:"Tippen, um einen Stein zu setzen",hSm:"Sanft hin und her streichen; die Muster werden weicher",
+        hAll:"✨ Der Sand kommt langsam zur Ruhe",hReset:"Garten zurückgesetzt",hStart:"Wähle oben ein Werkzeug und ziehe oder tippe dann auf den Sand",
+        close:"Schließen",openSet:"Einstellungen öffnen",aSand:"Interaktiver Sandgarten",aGame:"Spiel Zen-Sandgarten",aTools:"Sandwerkzeuge"
+      },
+      id:{
+        title:"Taman Pasir Zen",sub:"Tenangkan hati dan rasakan hangatnya pasir",
+        rakeT:"Garu",rakeD:"Gores garis halus di pasir, dengan punggungan lembut di kedua sisi",
+        fingT:"Dorong dengan Jari",fingD:"Dorong butiran pasir ke samping dan kumpulkan jadi gundukan kecil di depan jari",
+        ripT:"Riak",ripD:"Tekan dan tahan agar riak menyebar perlahan; lepaskan dan suara memudar",
+        stoT:"Batu",stoD:"Ketuk pasir untuk meletakkan batu",
+        allT:"Ratakan Semua",allD:"Biarkan seluruh permukaan pasir menjadi tenang",
+        smT:"Ratakan dengan Telapak Tangan",smD:"Usap bolak-balik; pola pasir akan melembut dan memudar. Batu akan terdorong dengan pelan",
+        start:"✦ Mulai Bersantai ✦",tip:"🎧 Ketuk di mana saja untuk memulai musik yang lembut",
+        tRake:"🖊 Garu",tFing:"👆 Dorong",tRip:"〇 Riak",tSto:"⬤ Batu",tSm:"🤚 Ratakan",tAll:"✨ Ratakan Semua",tReset:"↺ Atur Ulang",
+        setT:"⚙️ Pengaturan",lMusic:"🎵 Musik latar",lFx:"🔊 Efek suara",on:"Aktif",mute:"Senyap",vMusic:"Volume musik",vFx:"Volume efek suara",
+        bProf:"👤 Profil",bAbout:"ℹ️ Tentang Taman Pasir Zen",bFb:"👍 Suka taman ini?",bSup:"☕ Dukungan Sukarela",bSug:"💬 Kirim saran",
+        aT:"Tentang Taman Pasir Zen",
+        a1:"Saya juga pernah dikelilingi tekanan dan kekhawatiran, dan untuk waktu yang lama hati saya penuh dengan rasa sakit dan gelisah.",
+        a2:"Perlahan-lahan saya bangkit, dan saya belajar bahwa ketika hati tenang lebih dulu, kita punya tenaga untuk berpikir jernih dan bisa melihat sisi yang indah lagi.",
+        a3:"Maka saya membuat “Taman Pasir Zen” ini. Saat Anda lelah, semoga Anda bisa menyingkirkan sejenak rasa sakit, tekanan, dan kekhawatiran, menggerakkan pasir dengan lembut, dan menenangkan hati.",
+        a4:"Tidak ada tujuan yang harus dicapai dan tidak perlu masuk akun. Pelan-pelan saja, sesuai langkah Anda sendiri. 🤍",
+        aN:"Taman ini adalah sudut kecil untuk bersantai dan tidak menggantikan bantuan profesional. Jika Anda merasa tidak sanggup lagi, bicaralah dengan orang yang Anda percaya atau tenaga profesional.",
+        aP:"Situs ini menggunakan statistik anonim tanpa data pribadi, hanya untuk mengetahui jumlah pengunjung. Nama dan pilihan suka/tidak suka Anda hanya tersimpan di peramban Anda. Formulir saran sepenuhnya sukarela; boleh dilewati.",
+        pT:"👤 Profil",pL:"Nama / nama panggilan (opsional)",pPh:"mis. Pasir",pSave:"Simpan",pClr:"Hapus nama",
+        pN:"Nama hanya ditampilkan pada sapaan di layar utama dan disimpan di peramban ini. Tanpa kata sandi, tanpa akun online, dan tanpa sinkronisasi antarperangkat. Jangan memasukkan data pribadi yang sensitif.",
+        pErr1:"Masukkan nama sepanjang 1 sampai 20 karakter.",pErr2:"Tidak dapat menyimpan. Pastikan peramban Anda mengizinkan penyimpanan lokal.",pOk:"Tersimpan ✓",pErr3:"Tidak dapat menghapus data lokal.",pClrd:"Nama dihapus",
+        hello:n=>"Halo, "+n,
+        fT:"Suka taman ini?",f1:"Terima kasih sudah singgah di taman kecil ini.",
+        f2:"Jika tempat ini memberi sedikit ketenangan atau menemani Anda di saat lelah, silakan tinggalkan masukan singkat.",
+        like:"Suka",dis:"Tidak suka",
+        fN:"Masukan ini hanya disimpan di peramban Anda saat ini. Tanpa login, tanpa pembayaran, dan tidak ada data pribadi yang dikirim.",
+        fP:"Ketuk 👍 atau 👎 untuk membagikan perasaan Anda.",fLike:"Terima kasih sudah menyukainya. Semoga taman ini membantu Anda bersantai pelan-pelan. 🤍",fDis:"Terima kasih atas masukan Anda. Saya akan terus memperbaiki taman ini.",
+        sT:"☕ Dukungan Sukarela",s1:"Taman ini gratis dan tanpa iklan.",
+        s2:"Jika berkenan, Anda boleh mendukungnya secara bebas; sekadar singgah duduk sebentar pun sangat diterima.",
+        s3:"Apa pun pilihan Anda, terima kasih sudah datang. Semoga Anda beristirahat dengan baik. 🤍",
+        sBtn:"Ke halaman dukungan ↗",
+        sN:"Dukungan sepenuhnya sukarela dan tidak memengaruhi bagian mana pun dari permainan. Permainan ini tidak mengumpulkan atau menyimpan data pembayaran Anda.",
+        hRake:"Seret untuk menggores garis halus dengan garu",hFing:"Seret untuk mendorong pasir dengan jari",hRip:"Tekan dan tahan agar riak menyebar; lepaskan dan suara memudar",hSto:"Ketuk untuk meletakkan batu",hSm:"Usap pelan bolak-balik; pola akan melembut",
+        hAll:"✨ Pasir perlahan menjadi tenang",hReset:"Taman diatur ulang",hStart:"Pilih alat di atas, lalu seret atau ketuk pada pasir",
+        close:"Tutup",openSet:"Buka pengaturan",aSand:"Taman pasir interaktif",aGame:"Permainan Taman Pasir Zen",aTools:"Alat pasir"
+      },
+      ms:{
+        title:"Taman Pasir Zen",sub:"Tenangkan hati dan rasai kehangatan pasir",
+        rakeT:"Garu",rakeD:"Lukis garisan halus pada pasir, dengan permatang lembut di kedua-dua sisi",
+        fingT:"Tolak Pasir",fingD:"Tolak butir pasir ke tepi dan kumpulkan menjadi busut kecil di hadapan jari",
+        ripT:"Riak",ripD:"Tekan dan tahan supaya riak merebak perlahan; lepaskan dan bunyi beransur hilang",
+        stoT:"Batu",stoD:"Ketik pada pasir untuk meletakkan sebiji batu",
+        allT:"Ratakan Semua",allD:"Biarkan seluruh permukaan pasir menjadi tenang",
+        smT:"Ratakan dengan Tapak Tangan",smD:"Usap ke depan dan ke belakang; corak akan menjadi lembut dan cetek. Batu akan ditolak dengan perlahan",
+        start:"✦ Mulakan Berehat ✦",tip:"🎧 Ketik di mana-mana untuk memulakan muzik yang lembut",
+        tRake:"🖊 Garu",tFing:"👆 Tolak",tRip:"〇 Riak",tSto:"⬤ Batu",tSm:"🤚 Ratakan",tAll:"✨ Ratakan Semua",tReset:"↺ Set Semula",
+        setT:"⚙️ Tetapan",lMusic:"🎵 Muzik latar",lFx:"🔊 Kesan bunyi",on:"Hidup",mute:"Senyap",vMusic:"Kelantangan muzik",vFx:"Kelantangan kesan bunyi",
+        bProf:"👤 Profil",bAbout:"ℹ️ Tentang Taman Pasir Zen",bFb:"👍 Sukakan taman ini?",bSup:"☕ Sokongan Sukarela",bSug:"💬 Hantar cadangan",
+        aT:"Tentang Taman Pasir Zen",
+        a1:"Saya juga pernah dikelilingi tekanan dan kebimbangan, dan untuk jangka masa yang lama hati saya penuh dengan kesakitan dan resah.",
+        a2:"Perlahan-lahan saya pulih, dan saya belajar bahawa apabila hati tenang dahulu, barulah ada tenaga untuk berfikir dengan baik dan melihat sisi yang indah.",
+        a3:"Jadi saya membina “Taman Pasir Zen” ini. Semoga ketika anda penat, anda dapat meletakkan kesakitan, tekanan dan kebimbangan di tepi seketika, mengusik pasir dengan lembut, dan menenangkan hati.",
+        a4:"Tiada matlamat untuk dicapai dan tiada log masuk. Perlahan-lahan sahaja, mengikut rentak anda sendiri. 🤍",
+        aN:"Taman ini ialah sudut kecil untuk berehat dan tidak dapat menggantikan bantuan profesional. Jika anda rasa tidak tertanggung, sila berbual dengan orang yang anda percayai atau seorang profesional.",
+        aP:"Laman ini menggunakan statistik tanpa nama yang tidak mengandungi data peribadi, hanya untuk mengetahui bilangan pengunjung. Nama dan pilihan suka/tidak suka anda hanya disimpan dalam pelayar anda. Borang cadangan sepenuhnya sukarela; boleh dilangkau.",
+        pT:"👤 Profil",pL:"Nama / nama panggilan (pilihan)",pPh:"cth: Pasir",pSave:"Simpan",pClr:"Padam nama",
+        pN:"Nama hanya dipaparkan pada ucapan di skrin utama dan disimpan dalam pelayar ini. Tiada kata laluan, tiada akaun dalam talian dan tiada penyegerakan antara peranti. Jangan masukkan maklumat peribadi yang sensitif.",
+        pErr1:"Sila masukkan nama sepanjang 1 hingga 20 aksara.",pErr2:"Tidak dapat menyimpan. Pastikan pelayar anda membenarkan storan setempat.",pOk:"Disimpan ✓",pErr3:"Tidak dapat memadam data setempat.",pClrd:"Nama telah dipadam",
+        hello:n=>"Helo, "+n,
+        fT:"Sukakan taman ini?",f1:"Terima kasih kerana singgah di taman kecil ini.",
+        f2:"Jika tempat ini memberi anda sedikit ketenangan atau menemani anda ketika penat, anda dialu-alukan untuk memberi maklum balas ringkas.",
+        like:"Suka",dis:"Tidak suka",
+        fN:"Maklum balas ini hanya disimpan dalam pelayar anda sekarang. Tiada log masuk, tiada pembayaran dan tiada data peribadi dihantar.",
+        fP:"Ketik 👍 atau 👎 untuk berkongsi perasaan anda.",fLike:"Terima kasih kerana menyukainya. Semoga taman ini membantu anda berehat perlahan-lahan. 🤍",fDis:"Terima kasih atas maklum balas anda. Saya akan terus memperbaiki taman ini.",
+        sT:"☕ Sokongan Sukarela",s1:"Taman ini percuma dan tiada iklan.",
+        s2:"Jika anda sudi, anda boleh menyokong secara sukarela; sekadar singgah duduk sebentar pun amat dialu-alukan.",
+        s3:"Walau apa pun, terima kasih kerana datang. Semoga anda berehat dengan baik. 🤍",
+        sBtn:"Ke halaman sokongan ↗",
+        sN:"Sokongan sepenuhnya sukarela dan tidak menjejaskan sebarang bahagian permainan. Permainan ini tidak mengumpul atau menyimpan maklumat pembayaran anda.",
+        hRake:"Seret untuk melukis garisan halus dengan garu",hFing:"Seret untuk menolak pasir dengan jari",hRip:"Tekan dan tahan supaya riak merebak; lepaskan dan bunyi beransur hilang",hSto:"Ketik untuk meletakkan batu",hSm:"Usap perlahan ke depan dan ke belakang; corak akan menjadi lembut",
+        hAll:"✨ Pasir perlahan-lahan menjadi tenang",hReset:"Taman telah diset semula",hStart:"Pilih alat di atas, kemudian seret atau ketik pada pasir",
+        close:"Tutup",openSet:"Buka tetapan",aSand:"Taman pasir interaktif",aGame:"Permainan Taman Pasir Zen",aTools:"Alat pasir"
+      }
+    };
+    const HOME_TXT={zh:'回首頁','zh-CN':'回首页',en:'Home',ja:'ホームへ',ko:'홈으로',fr:'Accueil',es:'Inicio',de:'Startseite',id:'Beranda',ms:'Laman utama'};
+    const HELLO_DEF={zh:'您好','zh-CN':'您好',en:'Hello',ja:'こんにちは',ko:'안녕하세요',fr:'Bonjour',es:'Hola',de:'Hallo',id:'Halo',ms:'Helo'};
+    const HTML_LANG={zh:'zh-TW','zh-CN':'zh-CN',en:'en',ja:'ja',ko:'ko',fr:'fr',es:'es',de:'de',id:'id',ms:'ms'};
+
+    const $=id=>document.getElementById(id);
+    const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+    const rand=(a,b)=>a+Math.random()*(b-a);
+    const safeGet=k=>{try{return localStorage.getItem(k)}catch{return null}};
+    const safeSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch{return false}};
+    const safeRemove=k=>{try{localStorage.removeItem(k);return true}catch{return false}};
+
+    function detectLang(){
+      const s=safeGet('zen-sand-lang');
+      if(s&&I18N[s])return s;
+      const n=(navigator.language||'').toLowerCase();
+      if(n.startsWith('zh'))return /cn|sg|hans/.test(n)?'zh-CN':'zh';
+      const b=n.split('-')[0];
+      return I18N[b]?b:'en';
+    }
+    let lang=detectLang();
+    function t(k,...a){
+      const v=(I18N[lang]&&I18N[lang][k]!==undefined)?I18N[lang][k]:I18N.en[k];
+      return typeof v==='function'?v(...a):v;
+    }
+
+    if(SUGGEST_URL){
+      $('suggest-link').href=SUGGEST_URL;
+      $('suggest-link').classList.remove('hidden');
+    }
+
+    ['contextmenu','selectstart','dragstart'].forEach(type=>{
+      $('game').addEventListener(type,e=>e.preventDefault());
+    });
+
+    let settingsOpen=false,settingsTrigger=null;
+    function placeSettings(btn){
+      const r=btn.getBoundingClientRect();
+      $('settings').style.top=Math.max(8,Math.min(r.bottom+6,innerHeight-140))+'px';
+    }
+    function closeSettings(){
+      settingsOpen=false;
+      $('settings').classList.add('hidden');
+      document.querySelectorAll('[data-settings]').forEach(b=>b.setAttribute('aria-expanded','false'));
+    }
+    document.querySelectorAll('[data-settings]').forEach(b=>b.addEventListener('click',()=>{
+      settingsOpen=!settingsOpen;settingsTrigger=b;
+      if(settingsOpen)placeSettings(b);
+      $('settings').classList.toggle('hidden',!settingsOpen);
+      document.querySelectorAll('[data-settings]').forEach(x=>x.setAttribute('aria-expanded',String(settingsOpen)));
+    }));
+    document.addEventListener('pointerdown',e=>{
+      if(!settingsOpen||e.target.closest('#settings')||e.target.closest('[data-settings]'))return;
+      closeSettings();
+      if(e.target.closest('#sand-wrap')){e.stopPropagation();e.preventDefault()}
+    },true);
+    function openModal(id){closeSettings();$(id).classList.remove('hidden')}
+    function closeModal(el){el.classList.add('hidden')}
+    document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{
+      if(e.target===m||e.target.closest('[data-close]'))closeModal(m);
+    }));
+    document.addEventListener('keydown',e=>{
+      if(e.key!=='Escape')return;
+      closeSettings();
+      document.querySelectorAll('.modal:not(.hidden)').forEach(closeModal);
+    });
+    $('about-button').onclick=()=>openModal('about-modal');
+    $('support-button').onclick=()=>openModal('support-modal');
+
+    const FEEDBACK_KEY='zen-sand-feedback';
+    function updateFeedbackUI(){
+      const v=safeGet(FEEDBACK_KEY);
+      $('like-button').classList.toggle('selected',v==='like');
+      $('dislike-button').classList.toggle('selected',v==='dislike');
+      if(v==='like')$('feedback-msg').textContent=t('fLike');
+      else if(v==='dislike')$('feedback-msg').textContent=t('fDis');
+      else $('feedback-msg').textContent=t('fP');
+    }
+    function setFeedback(v){
+      if(!safeSet(FEEDBACK_KEY,v)){
+        $('feedback-msg').textContent=t('pErr2');
+        return;
+      }
+      updateFeedbackUI();
+    }
+    $('feedback-button').onclick=()=>{updateFeedbackUI();openModal('feedback-modal')};
+    $('like-button').onclick=()=>setFeedback('like');
+    $('dislike-button').onclick=()=>setFeedback('dislike');
+
+    let nickname=safeGet('zen-sand-nickname')||'';
+    function updateGreeting(){$('greeting').textContent=nickname?t('hello',nickname):(HELLO_DEF[lang]||'Hello')}
+    function setMsg(text,isError){
+      $('profile-msg').textContent=text;
+      $('profile-msg').classList.toggle('error',!!isError);
+    }
+    $('profile-button').onclick=()=>{
+      $('nickname').value=nickname;setMsg('');
+      $('clear-profile').classList.toggle('hidden',!nickname);
+      openModal('profile-modal');$('nickname').focus();
+    };
+    $('save-profile').onclick=()=>{
+      const v=$('nickname').value.trim();
+      if(v.length<1||v.length>20){setMsg(t('pErr1'),true);return}
+      if(!safeSet('zen-sand-nickname',v)){setMsg(t('pErr2'),true);return}
+      nickname=v;updateGreeting();
+      $('clear-profile').classList.remove('hidden');setMsg(t('pOk'));
+    };
+    $('clear-profile').onclick=()=>{
+      if(!safeRemove('zen-sand-nickname')){setMsg(t('pErr3'),true);return}
+      nickname='';updateGreeting();$('nickname').value='';
+      $('clear-profile').classList.add('hidden');setMsg(t('pClrd'));
+    };
+    $('nickname').addEventListener('keydown',e=>{if(e.key==='Enter')$('save-profile').click()});
+
+    const volume={
+      music:clamp(Number(safeGet('zen-sand-music-volume')??18),0,100),
+      fx:clamp(Number(safeGet('zen-sand-fx-volume')??55),0,100)
+    };
+    const enabled={
+      music:safeGet('zen-sand-music-on')!=='false',
+      fx:safeGet('zen-sand-fx-on')!=='false'
+    };
+    let ac=null,musicMaster=null,fxMaster=null,chordStep=0;
+    const notes=[261.63,293.66,329.63,392,440,523.25,587.33];
+    const chords=[[0,2,4],[1,3,5],[0,3,5],[2,4,6]];
+    function syncSoundUI(){
+      $('music-volume').value=volume.music;$('fx-volume').value=volume.fx;
+      $('music-toggle').textContent=enabled.music?t('on'):t('mute');
+      $('fx-toggle').textContent=enabled.fx?t('on'):t('mute');
+    }
+    function applySound(){
+      if(!ac||!musicMaster||!fxMaster)return;
+      musicMaster.gain.setTargetAtTime(enabled.music?volume.music/100*.75:0,ac.currentTime,.25);
+      fxMaster.gain.setTargetAtTime(enabled.fx?volume.fx/100*.8:0,ac.currentTime,.1);
+    }
+    function updateMusicTip(){
+      const needTap=enabled.music&&(!ac||ac.state!=='running')&&$('intro').style.display!=='none';
+      $('music-tip').classList.toggle('hidden',!needTap);
+    }
+    function tone(freq,start,duration,loud,dest){
+      const osc=ac.createOscillator(),gain=ac.createGain();
+      osc.type='sine';osc.frequency.value=freq;
+      gain.gain.setValueAtTime(.0001,start);
+      gain.gain.linearRampToValueAtTime(loud,start+.12);
+      gain.gain.exponentialRampToValueAtTime(.0001,start+duration);
+      osc.connect(gain);gain.connect(dest);
+      osc.start(start);osc.stop(start+duration+.02);
+    }
+    function playChord(){
+      if(!ac||!enabled.music)return;
+      const now=ac.currentTime,part=chords[chordStep++%chords.length];
+      part.forEach((n,i)=>tone(notes[n],now+i*.43,3.2,.19,musicMaster));
+      tone(notes[part[0]]/2,now,3.7,.12,musicMaster);
+    }
+    function initAudio(){
+      try{
+        if(!ac){
+          const AudioCtx=window.AudioContext||window.webkitAudioContext;
+          if(!AudioCtx)return;
+          ac=new AudioCtx();
+          musicMaster=ac.createGain();musicMaster.gain.value=0;musicMaster.connect(ac.destination);
+          fxMaster=ac.createGain();fxMaster.gain.value=0;fxMaster.connect(ac.destination);
+          const dl=ac.createDelay(1),fb=ac.createGain(),lp=ac.createBiquadFilter(),wet=ac.createGain();
+          dl.delayTime.value=.27;fb.gain.value=.36;lp.type='lowpass';lp.frequency.value=1800;wet.gain.value=.28;
+          fxMaster.connect(dl);dl.connect(lp);lp.connect(fb);fb.connect(dl);lp.connect(wet);wet.connect(ac.destination);
+          ac.onstatechange=updateMusicTip;applySound();
+          setInterval(()=>{if(enabled.music&&ac.state==='running')playChord()},4300);
+          if(enabled.music)playChord();
+        }
+        if(ac.state==='suspended'&&!document.hidden){
+          const p=ac.resume();if(p&&p.then)p.then(updateMusicTip,()=>{});
+        }
+      }catch(e){console.warn('Audio unavailable',e)}
+      updateMusicTip();
+    }
+    function beep(freq,duration=.2,loud=.09){
+      if(ac&&enabled.fx)tone(freq,ac.currentTime,duration,loud,fxMaster);
+    }
+
+    const sandCfg={
+      rake:{type:'bandpass',f:2600,q:1.1,gain:2.6,buf:'grain'},
+      finger:{type:'bandpass',f:720,q:.7,gain:1.3,buf:'soft'},
+      smooth:{type:'lowpass',f:480,q:.4,gain:1.5,buf:'soft'}
+    };
+    const sandVoices={};
+    function makeNoiseBuffer(kind){
+      const len=Math.floor(ac.sampleRate*3),buf=ac.createBuffer(1,len,ac.sampleRate),d=buf.getChannelData(0);
+      if(kind==='grain'){
+        for(let i=0;i<len;i++)d[i]=Math.random()<.035?(Math.random()*2-1):(Math.random()*2-1)*.08;
+      }else{
+        let last=0;
+        for(let i=0;i<len;i++){const w=Math.random()*2-1;last=(last+.02*w)/1.02;d[i]=clamp(last*4,-1,1)}
+      }
+      return buf;
+    }
+    function getSandVoice(kind){
+      if(sandVoices[kind])return sandVoices[kind];
+      const c=sandCfg[kind],src=ac.createBufferSource(),filt=ac.createBiquadFilter(),g=ac.createGain();
+      src.buffer=makeNoiseBuffer(c.buf);src.loop=true;
+      filt.type=c.type;filt.frequency.value=c.f;filt.Q.value=c.q;g.gain.value=0;
+      src.connect(filt);filt.connect(g);g.connect(fxMaster);src.start();
+      return sandVoices[kind]={filt,g,cfg:c};
+    }
+    function startSandSound(v,kind){
+      if(!ac||!enabled.fx||!sandCfg[kind])return;
+      const t0=ac.currentTime,s=getSandVoice(kind),sp=Math.min(v,2);
+      for(const k in sandVoices)if(k!==kind)sandVoices[k].g.gain.setTargetAtTime(0,t0,.1);
+      s.filt.frequency.setTargetAtTime(s.cfg.f*(1+sp*.2),t0,.1);
+      s.g.gain.setTargetAtTime(clamp(.04+sp*.12,.04,.2)*s.cfg.gain,t0,.08);
+    }
+    function stopSandSound(){
+      if(!ac)return;
+      for(const k in sandVoices)sandVoices[k].g.gain.setTargetAtTime(0,ac.currentTime,.18);
+    }
+    function noiseBurst(t0,dur,freq,loud){
+      const n=Math.max(1,Math.floor(ac.sampleRate*dur)),b=ac.createBuffer(1,n,ac.sampleRate),d=b.getChannelData(0);
+      for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n);
+      const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();
+      s.buffer=b;f.type='lowpass';f.frequency.value=freq;g.gain.value=loud;
+      s.connect(f);f.connect(g);g.connect(fxMaster);s.start(t0);
+    }
+    function stoneSound(){
+      if(!ac||!enabled.fx)return;
+      const t0=ac.currentTime,o=ac.createOscillator(),g=ac.createGain();
+      o.type='sine';o.frequency.setValueAtTime(150,t0);o.frequency.exponentialRampToValueAtTime(62,t0+.22);
+      g.gain.setValueAtTime(.0001,t0);g.gain.linearRampToValueAtTime(.22,t0+.015);g.gain.exponentialRampToValueAtTime(.0001,t0+.55);
+      o.connect(g);g.connect(fxMaster);o.start(t0);o.stop(t0+.6);
+      noiseBurst(t0,.09,520,.12);
+      tone(rand(380,440),t0,.35,.025,fxMaster);
+    }
+    function stoneSlide(){
+      if(!ac||!enabled.fx)return;
+      const t0=ac.currentTime;
+      noiseBurst(t0,.18,320,.07);
+      tone(70,t0,.2,.04,fxMaster);
+    }
+    function smoothAllSound(){
+      if(!ac||!enabled.fx)return;
+      const t0=ac.currentTime,len=3.2,n=Math.floor(ac.sampleRate*len);
+      const b=ac.createBuffer(1,n,ac.sampleRate),d=b.getChannelData(0);
+      let last=0;for(let i=0;i<n;i++){const w=Math.random()*2-1;last=(last+.02*w)/1.02;d[i]=clamp(last*4,-1,1)}
+      const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();
+      s.buffer=b;f.type='lowpass';
+      f.frequency.setValueAtTime(1600,t0);f.frequency.exponentialRampToValueAtTime(280,t0+len);
+      g.gain.setValueAtTime(.0001,t0);g.gain.linearRampToValueAtTime(.16,t0+.6);g.gain.linearRampToValueAtTime(.0001,t0+len);
+      s.connect(f);f.connect(g);g.connect(fxMaster);s.start(t0);
+      tone(523.25,t0+.1,3.2,.05,fxMaster);
+      tone(392,t0+.6,3.2,.045,fxMaster);
+      tone(293.66,t0+1.1,3.4,.05,fxMaster);
+    }
+
+    for(const kind of ['music','fx']){
+      $(kind+'-volume').addEventListener('input',e=>{
+        volume[kind]=Number(e.target.value);
+        safeSet('zen-sand-'+kind+'-volume',String(volume[kind]));applySound();
+      });
+      $(kind+'-toggle').addEventListener('click',()=>{
+        enabled[kind]=!enabled[kind];
+        safeSet('zen-sand-'+kind+'-on',String(enabled[kind]));
+        syncSoundUI();applySound();
+        if(kind==='music'&&enabled.music&&ac)playChord();
+        if(kind==='fx'&&!enabled.fx)stopSandSound();
+        updateMusicTip();
+      });
+    }
+    ['pointerdown','keydown'].forEach(ev=>document.addEventListener(ev,()=>{
+      if(!ac||ac.state!=='running')initAudio();
+    },{capture:true,passive:true}));
+    document.addEventListener('visibilitychange',()=>{
+      if(!ac)return;
+      if(document.hidden)ac.suspend().catch(()=>{});
+      else ac.resume().catch(()=>{});
+    });
+
+    // ===== 語言切換 =====
+    function applyLang(){
+      document.documentElement.lang=HTML_LANG[lang]||'en';
+      document.title=t('title');
+      document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=t(el.dataset.i18n)});
+      document.querySelectorAll('[data-i18n-aria]').forEach(el=>{el.setAttribute('aria-label',t(el.dataset.i18nAria))});
+      document.querySelectorAll('[data-i18n-title]').forEach(el=>{el.setAttribute('title',t(el.dataset.i18nTitle))});
+      document.querySelectorAll('[data-i18n-ph]').forEach(el=>{el.setAttribute('placeholder',t(el.dataset.i18nPh))});
+      $('lang-select').value=lang;
+      $('home-button').setAttribute('aria-label',HOME_TXT[lang]||'Home');
+      $('home-button').setAttribute('title',HOME_TXT[lang]||'Home');
+      syncSoundUI();updateGreeting();updateFeedbackUI();setMsg('');updateMusicTip();
+    }
+    $('lang-select').addEventListener('change',e=>{
+      lang=I18N[e.target.value]?e.target.value:'en';
+      safeSet('zen-sand-lang',lang);
+      applyLang();
+    });
+
+    const canvas=$('sand'),ctx=canvas.getContext('2d');
+    const base=document.createElement('canvas'),bg=base.getContext('2d');
+    const hm=document.createElement('canvas'),hx=hm.getContext('2d');
+    const CELL=3;
+    let W=0,H=0,cols=0,rows=0,height=null,tmp=null,img=null,stones=[],tool='rake';
+    let drawing=false,pid=null,lastP=null,cur=null,dir={x:1,y:0},hasDir=false;
+    let lastMoveT=0,lastEvT=0,vs=0,dirty=null,needDraw=false,looping=false,settle=0,hintTimer,prevT=0;
+    const particles=[];
+
+    function buildBase(){
+      const g=bg.createLinearGradient(0,0,W,H);
+      g.addColorStop(0,'#e2c68c');g.addColorStop(.55,'#d6b87b');g.addColorStop(1,'#c3a165');
+      bg.fillStyle=g;bg.fillRect(0,0,W,H);
+      for(let i=0;i<14;i++){
+        const x=Math.random()*W,y=Math.random()*H,r=rand(80,220);
+        const rg=bg.createRadialGradient(x,y,0,x,y,r),c=i%2?'255,240,200':'120,80,30';
+        rg.addColorStop(0,'rgba('+c+','+(i%2?.10:.07)+')');rg.addColorStop(1,'rgba('+c+',0)');
+        bg.fillStyle=rg;bg.fillRect(x-r,y-r,r*2,r*2);
+      }
+      const tones=['rgba(255,244,205,.22)','rgba(120,76,22,.16)','rgba(255,255,255,.12)'];
+      for(let i=0,n=Math.floor(W*H/6);i<n;i++){
+        bg.fillStyle=tones[(Math.random()*3)|0];bg.fillRect(Math.random()*W,Math.random()*H,1,1);
+      }
+    }
+    function resize(){
+      if($('game').style.display!=='flex')return;
+      const nw=Math.max(1,Math.floor($('sand-wrap').clientWidth));
+      const nh=Math.max(1,Math.floor($('sand-wrap').clientHeight));
+      if(nw===W&&nh===H&&height)return;
+      const oldH=height,oldCols=cols,oldRows=rows;
+      W=nw;H=nh;canvas.width=base.width=W;canvas.height=base.height=H;
+      cols=Math.ceil(W/CELL);rows=Math.ceil(H/CELL);
+      height=new Float32Array(cols*rows);tmp=new Float32Array(cols*rows);
+      if(oldH){
+        const cc=Math.min(cols,oldCols),rr=Math.min(rows,oldRows);
+        for(let r=0;r<rr;r++)for(let c=0;c<cc;c++)height[r*cols+c]=oldH[r*oldCols+c];
+      }
+      dirty=null;
+      hm.width=cols;hm.height=rows;img=hx.createImageData(cols,rows);
+      stones.forEach(s=>{
+        s.x=clamp(s.x,s.rx+2,Math.max(s.rx+2,W-s.rx-2));
+        s.y=clamp(s.y,s.ry+2,Math.max(s.ry+2,H-s.ry-2));
+      });
+      buildBase();requestDraw();
+    }
+    window.addEventListener('resize',()=>{
+      resize();if(settingsOpen&&settingsTrigger)placeSettings(settingsTrigger);
+    });
+    function mark(c0,r0,c1,r1){
+      if(!dirty)dirty={c0,r0,c1,r1};
+      else{dirty.c0=Math.min(dirty.c0,c0);dirty.r0=Math.min(dirty.r0,r0);dirty.c1=Math.max(dirty.c1,c1);dirty.r1=Math.max(dirty.r1,r1)}
+      needDraw=true;
+    }
+    function bell(x,y,r,fn){
+      const c0=Math.max(0,Math.floor((x-r)/CELL)),c1=Math.min(cols-1,Math.floor((x+r)/CELL));
+      const r0=Math.max(0,Math.floor((y-r)/CELL)),r1=Math.min(rows-1,Math.floor((y+r)/CELL)),rr=r*r;
+      for(let row=r0;row<=r1;row++)for(let col=c0;col<=c1;col++){
+        const dx=(col+.5)*CELL-x,dy=(row+.5)*CELL-y,d2=(dx*dx+dy*dy)/rr;
+        if(d2>=1)continue;
+        const k=1-d2;fn(row*cols+col,k*k);
+      }
+      if(c1>=c0&&r1>=r0)mark(c0,r0,c1,r1);
+    }
+    function carve(x,y,r,depth){
+      bell(x,y,r,(i,w)=>{const tt=-depth*w;if(height[i]>tt)height[i]+=(tt-height[i])*.65});
+    }
+    function pile(x,y,r,val,cap){
+      bell(x,y,r,(i,w)=>{if(height[i]<cap)height[i]=Math.min(cap,height[i]+val*w)});
+    }
+    function relaxDirty(){
+      if(!dirty)return;
+      const c0=Math.max(1,dirty.c0-1),r0=Math.max(1,dirty.r0-1);
+      const c1=Math.min(cols-2,dirty.c1+1),r1=Math.min(rows-2,dirty.r1+1);
+      dirty=null;
+      for(let r=r0;r<=r1;r++)for(let c=c0;c<=c1;c++){
+        const i=r*cols+c,h=height[i],avg=(height[i-1]+height[i+1]+height[i-cols]+height[i+cols])*.25;
+        let v=h+(avg-h)*.025;if(v>-.004&&v<.004)v=0;tmp[i]=v;
+      }
+      for(let r=r0;r<=r1;r++)for(let c=c0;c<=c1;c++)height[r*cols+c]=tmp[r*cols+c];
+    }
+    const grainColors=['#f2deaa','#c9a56b','#8a6535'];
+    function spawnGrains(x,y,n,spread){
+      for(let i=0;i<n&&particles.length<100;i++){
+        const a=Math.random()*Math.PI*2,sp=rand(8,spread);
+        particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:rand(.3,.6),max:.6,c:grainColors[(Math.random()*3)|0]});
+      }
+    }
+    function updateParticles(dt){
+      for(let i=particles.length-1;i>=0;i--){
+        const p=particles[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.92;p.vy*=.92;p.life-=dt;
+        if(p.life<=0)particles.splice(i,1);
+      }
+    }
+    function render(now){
+      if(!height)return;
+      ctx.drawImage(base,0,0);
+      const d=img.data,K=.5;
+      for(let r=0;r<rows;r++){
+        const rr=r*cols,rU=(r>0?r-1:r)*cols,rD=(r<rows-1?r+1:r)*cols;
+        for(let c=0;c<cols;c++){
+          const i=rr+c,cL=c>0?c-1:c,cR=c<cols-1?c+1:c,h=height[i],o=i*4;
+          const lit=(height[rr+cR]-height[rr+cL]+height[rD+c]-height[rU+c])*K;
+          const net=(lit>0?lit:0)+(h>0?h*.08:0)-((lit<0?-lit:0)+(h<0?-h*.2:0));
+          if(net>=0){d[o]=255;d[o+1]=240;d[o+2]=196;d[o+3]=net<.012?0:Math.min(.6,net)*255}
+          else{d[o]=74;d[o+1]=43;d[o+2]=12;d[o+3]=-net<.012?0:Math.min(.62,-net)*255}
+        }
+      }
+      hx.putImageData(img,0,0);
+      ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+      ctx.drawImage(hm,0,0,cols*CELL,rows*CELL);
+      for(const p of particles){
+        const a=Math.min(1,p.life/p.max*1.4);
+        ctx.globalAlpha=a*.35;ctx.fillStyle='#5a3a12';ctx.fillRect(p.x+1,p.y+1.5,1.8,1.8);
+        ctx.globalAlpha=a;ctx.fillStyle=p.c;ctx.fillRect(p.x,p.y,1.8,1.8);
+      }
+      ctx.globalAlpha=1;for(const s of stones)drawStone(s,now);
+    }
+    const PALETTES=[
+      ['#b9bfb8','#575f58'],['#8a8d8f','#2f3335'],['#55555a','#161618'],['#d3c5b2','#7d6a55'],
+      ['#a98468','#4e3425'],['#d0cbbd','#8a8477'],['#93a89f','#3c4e47'],['#a3b3c1','#41505d'],
+      ['#c99f70','#6b4a2a'],['#b5846f','#5a3328']
+    ];
+    function stonePath(s){
+      ctx.beginPath();
+      for(let k=0;k<=40;k++){
+        const a=k/40*Math.PI*2;
+        let R=1;for(const l of s.lobes)R+=l.a*Math.cos(l.k*a+l.p);
+        const px=Math.cos(a)*s.rx*R,py=Math.sin(a)*s.ry*R;
+        if(k===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+      }
+      ctx.closePath();
+    }
+    function drawStone(s,now){
+      const age=Math.min(1,(now-s.born)/280),sc=1+.14*(1-age)*(1-age);
+      const r=(s.rx+s.ry)/2,ca=Math.cos(s.angle),sa=Math.sin(s.angle);
+      const wx=-.4*r,wy=-.45*r,lx=wx*ca+wy*sa,ly=-wx*sa+wy*ca;
+      ctx.save();ctx.translate(s.x,s.y);ctx.rotate(s.angle);ctx.scale(sc,sc);
+      stonePath(s);ctx.shadowColor='rgba(45,28,10,.5)';ctx.shadowBlur=12;ctx.shadowOffsetX=3;ctx.shadowOffsetY=5;
+      const g=ctx.createRadialGradient(lx,ly,2,0,0,s.rx*1.2);
+      g.addColorStop(0,s.light);g.addColorStop(1,s.dark);ctx.fillStyle=g;ctx.fill();
+      ctx.shadowColor='transparent';ctx.save();ctx.clip();
+      for(const k of s.specks){
+        ctx.fillStyle=k.light?'rgba(255,255,255,.2)':'rgba(0,0,0,.2)';
+        ctx.beginPath();ctx.arc(k.x*s.rx,k.y*s.ry,k.r,0,Math.PI*2);ctx.fill();
+      }
+      const hl=ctx.createRadialGradient(lx*1.1,ly*1.1,1,lx*1.1,ly*1.1,r*.8);
+      hl.addColorStop(0,'rgba(255,255,255,.28)');hl.addColorStop(1,'rgba(255,255,255,0)');
+      ctx.fillStyle=hl;ctx.fillRect(-s.rx*1.5,-s.ry*1.5,s.rx*3,s.ry*3);
+      ctx.restore();stonePath(s);ctx.strokeStyle='rgba(0,0,0,.22)';ctx.lineWidth=1;ctx.stroke();ctx.restore();
+    }
+    function placeStone(x,y){
+      const [light,dark]=PALETTES[(Math.random()*PALETTES.length)|0],rx=rand(15,28);
+      const s={x,y,rx,ry:rx*rand(.62,.88),angle:rand(0,Math.PI),light,dark,lastSound:0,born:performance.now(),
+        lobes:[{k:2,a:rand(.03,.09),p:rand(0,6.28)},{k:3,a:rand(.02,.07),p:rand(0,6.28)},{k:5,a:rand(.01,.03),p:rand(0,6.28)}],
+        specks:Array.from({length:18},()=>({x:rand(-.8,.8),y:rand(-.8,.8),r:rand(.6,1.5),light:Math.random()<.5}))};
+      s.x=clamp(s.x,s.rx+2,Math.max(s.rx+2,W-s.rx-2));
+      s.y=clamp(s.y,s.ry+2,Math.max(s.ry+2,H-s.ry-2));
+      stones.push(s);stoneSound();requestDraw();
+    }
+    function rakeStep(x,y){
+      const nx=-dir.y,ny=dir.x,offs=[-9,0,9];
+      for(const o of offs)carve(x+nx*o,y+ny*o,3.6,.7);
+      for(const o of [-13.5,-4.5,4.5,13.5])pile(x+nx*o,y+ny*o,3.2,.14,.34);
+      if(Math.random()<.1)spawnGrains(x+nx*offs[(Math.random()*3)|0],y+ny*offs[(Math.random()*3)|0],1,20);
+    }
+    function fingerStep(x,y){
+      const nx=-dir.y,ny=dir.x;
+      carve(x,y,9,.55);pile(x+dir.x*10,y+dir.y*10,7,.1,.6);
+      pile(x+nx*9.5,y+ny*9.5,5,.12,.45);pile(x-nx*9.5,y-ny*9.5,5,.12,.45);
+      if(Math.random()<.4)spawnGrains(x+dir.x*9,y+dir.y*9,1,38);
+    }
+    function smoothAt(x,y,k){
+      const rx=50,ry=30,c0=Math.max(0,Math.floor((x-rx)/CELL)),c1=Math.min(cols-1,Math.floor((x+rx)/CELL));
+      const r0=Math.max(0,Math.floor((y-ry)/CELL)),r1=Math.min(rows-1,Math.floor((y+ry)/CELL));
+      for(let r=r0;r<=r1;r++)for(let c=c0;c<=c1;c++){
+        const nx=((c+.5)*CELL-x)/rx,ny=((r+.5)*CELL-y)/ry,d2=nx*nx+ny*ny;
+        if(d2>=1)continue;
+        const i=r*cols+c,h=height[i];if(h===0)continue;
+        const w=(1-d2)*k;
+        const avg=(height[r*cols+Math.max(0,c-1)]+height[r*cols+Math.min(cols-1,c+1)]+height[Math.max(0,r-1)*cols+c]+height[Math.min(rows-1,r+1)*cols+c])*.25;
+        let v=h+(avg-h)*w*1.2-h*w*.5;if(v>-.012&&v<.012)v=0;height[i]=v;
+      }
+      if(c1>=c0&&r1>=r0)mark(c0,r0,c1,r1);
+    }
+    function pushStones(x,y,mx,my){
+      for(const s of stones){
+        if(Math.hypot((s.x-x)/50,(s.y-y)/30)<1){
+          const ox=s.x,oy=s.y;
+          s.x=clamp(s.x+mx*.5,s.rx+2,Math.max(s.rx+2,W-s.rx-2));
+          s.y=clamp(s.y+my*.5,s.ry+2,Math.max(s.ry+2,H-s.ry-2));
+          if(Math.hypot(s.x-ox,s.y-oy)>.3){
+            if(performance.now()-s.lastSound>240){stoneSlide();s.lastSound=performance.now()}
+            needDraw=true;
+          }
+        }
+      }
+    }
+    function smoothAll(){
+      if(!height)return;settle=110;requestDraw();smoothAllSound();hint(t('hAll'));
+    }
+
+    const RIPPLE_GAP=7,RIPPLE_START=14,RIPPLE_MAX=80,RIPPLE_GROW=12;
+    const RIPPLE_FREQ=[196,197.4,294,392,588];
+    const RIPPLE_AMP=[1,.7,.5,.3,.12];
+    let rp=null;
+    function ringStamp(x,y,i){
+      const r=i*RIPPLE_GAP,fade=Math.max(0,1-r/(RIPPLE_MAX+RIPPLE_GAP));
+      const amp=.28*fade*fade+.04;
+      for(let a=0;a<Math.PI*2;a+=2/r){
+        const px=x+Math.cos(a)*r,py=y+Math.sin(a)*r;
+        if(i%2)pile(px,py,2.8,amp,.3);else carve(px,py,2.8,amp);
+      }
+    }
+    function startRippleVoice(){
+      if(!ac||!enabled.fx)return null;
+      const t0=ac.currentTime,g=ac.createGain();
+      g.gain.setValueAtTime(.0001,t0);g.gain.linearRampToValueAtTime(.13,t0+1.2);g.connect(fxMaster);
+      const lfo=ac.createOscillator(),lg=ac.createGain();
+      lfo.frequency.value=.35;lg.gain.value=.02;lfo.connect(lg);lg.connect(g.gain);lfo.start(t0);
+      const oscs=RIPPLE_FREQ.map((f,i)=>{
+        const o=ac.createOscillator(),og=ac.createGain();
+        o.type='sine';o.frequency.value=f;og.gain.value=RIPPLE_AMP[i];
+        o.connect(og);og.connect(g);o.start(t0);return o;
+      });
+      return{g,oscs,lfo,lg};
+    }
+    function growRipple(now){
+      if(!rp||rp.done)return;
+      const radius=Math.min(RIPPLE_MAX,RIPPLE_START+(now-rp.t0)/1000*RIPPLE_GROW);
+      const target=Math.floor(radius/RIPPLE_GAP);
+      while(rp.ring<target){rp.ring++;ringStamp(rp.x,rp.y,rp.ring)}
+      if(rp.voice&&ac)rp.voice.oscs.forEach((o,i)=>o.frequency.setTargetAtTime(RIPPLE_FREQ[i]*(1+radius/500),ac.currentTime,.6));
+      if(radius>=RIPPLE_MAX)rp.done=true;
+    }
+    function startRipple(e,p){
+      const now=performance.now();
+      rp={id:e.pointerId,x:p.x,y:p.y,t0:now,ring:0,done:false,samples:[{x:e.clientX,y:e.clientY,t:now}],voice:startRippleVoice()};
+      carve(p.x,p.y,5,.45);try{canvas.setPointerCapture(e.pointerId)}catch{}
+      growRipple(now);requestDraw();
+    }
+    function endRipple(e){
+      if(!rp||(e&&e.pointerId!==rp.id))return;
+      const now=performance.now(),recent=rp.samples.filter(s=>now-s.t<150);
+      let speed=0;
+      if(recent.length>1){
+        const a=recent[0],b=recent[recent.length-1];
+        speed=Math.hypot(b.x-a.x,b.y-a.y)/Math.max(1,b.t-a.t);
+      }
+      const fade=clamp(10/(1+speed*2),3,10);
+      if(rp.voice&&ac){
+        const t0=ac.currentTime,v=rp.voice;
+        v.g.gain.cancelScheduledValues(t0);
+        v.g.gain.setValueAtTime(Math.max(v.g.gain.value,.0001),t0);
+        v.g.gain.setTargetAtTime(.0001,t0,fade/4);
+        v.lg.gain.setTargetAtTime(0,t0,fade/6);
+        v.oscs.forEach(o=>o.stop(t0+fade+1));
+        v.lfo.stop(t0+fade+1);
+      }
+      rp=null;
+    }
+
+    function kick(){if(!looping){looping=true;requestAnimationFrame(tick)}}
+    function requestDraw(){needDraw=true;kick()}
+    function tick(now){
+      looping=false;
+      const dt=Math.min(.05,prevT?(now-prevT)/1000:.016);prevT=now;
+      if(rp)growRipple(now);
+      if(drawing){
+        if(tool==='smooth'&&cur&&now-lastMoveT>60)smoothAt(cur.x,cur.y,.015);
+        if(now-lastMoveT>110)stopSandSound();
+      }
+      if(settle>0){
+        for(let i=0;i<height.length;i++){const v=height[i]*.955;height[i]=(v>-.01&&v<.01)?0:v}
+        settle--;needDraw=true;if(settle===0)height.fill(0);
+      }
+      relaxDirty();
+      if(particles.length){updateParticles(dt);needDraw=true}
+      const young=stones.some(s=>now-s.born<300);
+      if(young)needDraw=true;
+      if(needDraw){render(now);needDraw=false}
+      if((rp&&!rp.done)||drawing||settle>0||particles.length||young)kick();else prevT=0;
+    }
+    function hint(text){
+      $('hint').textContent=text;$('hint').classList.add('show');
+      clearTimeout(hintTimer);hintTimer=setTimeout(()=>$('hint').classList.remove('show'),2600);
+    }
+    function pos(e){
+      const rect=canvas.getBoundingClientRect();
+      return{x:(e.clientX-rect.left)*W/rect.width,y:(e.clientY-rect.top)*H/rect.height};
+    }
+    function stroke(a,b,now){
+      const dx=b.x-a.x,dy=b.y-a.y,dist=Math.hypot(dx,dy);
+      const ux=dx/dist,uy=dy/dist;
+      if(!hasDir){dir={x:ux,y:uy};hasDir=true}
+      const n=Math.max(1,Math.ceil(dist/3)),sx=dx/n,sy=dy/n;
+      for(let i=1;i<=n;i++){
+        const x=a.x+sx*i,y=a.y+sy*i;
+        dir.x=dir.x*.82+ux*.18;dir.y=dir.y*.82+uy*.18;
+        const m=Math.hypot(dir.x,dir.y)||1;dir.x/=m;dir.y/=m;
+        if(tool==='rake')rakeStep(x,y);
+        else if(tool==='finger')fingerStep(x,y);
+        else if(tool==='smooth'){smoothAt(x,y,.02);pushStones(x,y,sx,sy)}
+      }
+      lastMoveT=now;startSandSound(vs,tool);requestDraw();
+    }
+    canvas.addEventListener('pointerdown',e=>{
+      if(settingsOpen){closeSettings();return}
+      if(document.querySelector('.modal:not(.hidden)'))return;
+      initAudio();const p=pos(e);
+      if(tool==='ripple'){if(rp)endRipple();startRipple(e,p);e.preventDefault();return}
+      if(tool==='stone'){placeStone(p.x,p.y);e.preventDefault();return}
+      drawing=true;pid=e.pointerId;lastP=p;cur=p;hasDir=false;vs=0;
+      lastMoveT=lastEvT=performance.now();
+      try{canvas.setPointerCapture(e.pointerId)}catch{}
+      kick();e.preventDefault();
+    });
+    canvas.addEventListener('pointermove',e=>{
+      if(rp&&e.pointerId===rp.id){
+        const now=performance.now();
+        rp.samples.push({x:e.clientX,y:e.clientY,t:now});
+        while(rp.samples.length&&now-rp.samples[0].t>300)rp.samples.shift();
+        return;
+      }
+      if(!drawing||pid!==e.pointerId)return;
+      const p=pos(e),dist=Math.hypot(p.x-lastP.x,p.y-lastP.y);
+      if(dist<1)return;
+      const now=performance.now();
+      vs=vs*.6+(dist/Math.max(1,now-lastEvT))*.4;
+      stroke(lastP,p,now);lastP=p;cur=p;lastEvT=now;e.preventDefault();
+    });
+    function endStroke(e){
+      if(rp&&(!e||e.pointerId===rp.id)){endRipple(e);return}
+      if(e&&pid!==null&&e.pointerId!==pid)return;
+      drawing=false;pid=null;stopSandSound();
+    }
+    canvas.addEventListener('pointerup',endStroke);
+    canvas.addEventListener('pointercancel',endStroke);
+    canvas.addEventListener('lostpointercapture',endStroke);
+    const HINT_KEYS={rake:'hRake',finger:'hFing',ripple:'hRip',stone:'hSto',smooth:'hSm'};
+    document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>{
+      if(rp)endRipple();drawing=false;pid=null;tool=b.dataset.tool;
+      document.querySelectorAll('[data-tool]').forEach(x=>x.classList.toggle('active',x===b));
+      stopSandSound();hint(t(HINT_KEYS[tool]));
+    });
+    $('smooth-all').onclick=smoothAll;
+    $('reset').onclick=()=>{
+      if(!height)return;if(rp)endRipple();
+      height.fill(0);stones=[];particles.length=0;settle=0;
+      stopSandSound();requestDraw();beep(170,.25,.07);hint(t('hReset'));
+    };
+    $('start').onclick=()=>{
+      closeSettings();$('intro').style.display='none';$('game').style.display='flex';
+      resize();initAudio();updateMusicTip();hint(t('hStart'));
+    };
+    $('home-button').onclick=()=>{
+      closeSettings();
+      if(rp)endRipple();
+      drawing=false;pid=null;stopSandSound();
+      $('game').style.display='none';
+      $('intro').style.display='flex';
+      updateMusicTip();
+    };
+
+    applyLang();
+  </script>
+
+  <!-- ===== 統計程式碼放這裡（</body> 之前）=====
+       申請 Cloudflare Web Analytics 後，把它給您的 <script> 整段貼在這一行下面，例如：
+       <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "您的TOKEN"}'></script>
+  -->
+</body>
+</html>
