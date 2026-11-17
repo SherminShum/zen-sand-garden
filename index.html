@@ -596,7 +596,7 @@
     const safeRemove=k=>{try{localStorage.removeItem(k);return true}catch{return false}};
 
    function detectLang(){
-  const s=safeGet('zen-sand-lang');
+  const s=safeGet('zen-sand-lang-v2');
   if(s&&I18N[s])return s;
   return 'en';
     }
@@ -870,7 +870,7 @@
     }
     $('lang-select').addEventListener('change',e=>{
       lang=I18N[e.target.value]?e.target.value:'en';
-      safeSet('zen-sand-lang',lang);
+      safeSet('zen-sand-lang-v2',lang);
       applyLang();
     });
 
